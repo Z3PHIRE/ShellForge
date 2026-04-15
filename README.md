@@ -5,6 +5,29 @@
 GitHub short description:
 `Cross-platform PowerShell theme studio and deployment engine with native prompt rendering, safe profile integration and recoverable backups.`
 
+## Utilisation ultra simple
+
+Si tu veux juste recuperer le code et charger le module, copie-colle seulement ca.
+
+### Windows PowerShell ou PowerShell 7
+
+```powershell
+git clone https://github.com/Z3PHIRE/ShellForge.git
+Set-Location .\ShellForge
+Import-Module .\src\ShellForge\ShellForge.psd1 -Force
+Get-Command -Module ShellForge
+```
+
+### Linux avec `pwsh`
+
+```bash
+git clone https://github.com/Z3PHIRE/ShellForge.git
+cd ShellForge
+pwsh -NoProfile -Command "Import-Module ./src/ShellForge/ShellForge.psd1 -Force; Get-Command -Module ShellForge"
+```
+
+Si tu vois la liste des commandes ShellForge, c'est bon: le code est importe.
+
 ## Etat du depot
 
 Le depot contient deja le socle du produit:
@@ -17,7 +40,7 @@ Le depot contient deja le socle du produit:
 - integration sûre dans le profil PowerShell
 - base du custom builder, du moteur UI et des packs `.sfpack`
 
-Les elements encore a finaliser dans ce workspace sont les presets JSON, le `bootstrap.ps1`, `uninstall.ps1`, les assets SVG finaux, les commandes publiques restantes du manifest et la couverture Pester complete.
+Important: les presets JSON dans `themes/` ne sont pas encore ajoutes dans ce workspace. Les commandes qui appliquent un theme ont donc besoin qu'un theme soit ajoute avant utilisation.
 
 ## Vision produit
 
@@ -78,42 +101,39 @@ Pour verifier les commandes chargees:
 Get-Command -Module ShellForge
 ```
 
-## Commandes d'import et de deploiement
+## Commandes copier-coller
 
-### Windows PowerShell ou PowerShell 7 depuis un clone Git
+### Windows PowerShell ou PowerShell 7
 
-Cloner le depot, importer le module, puis deployer un theme localement:
+Pour recuperer le code et charger le module:
 
 ```powershell
-git clone https://github.com/<OWNER>/ShellForge.git
+git clone https://github.com/Z3PHIRE/ShellForge.git
 Set-Location .\ShellForge
 Import-Module .\src\ShellForge\ShellForge.psd1 -Force
-Install-ShellForgeTheme -Path .\themes\cyberglass.json
+Get-Command -Module ShellForge
 ```
 
 Version en une seule ligne:
 
 ```powershell
-git clone https://github.com/<OWNER>/ShellForge.git; Set-Location .\ShellForge; Import-Module .\src\ShellForge\ShellForge.psd1 -Force; Install-ShellForgeTheme -Path .\themes\cyberglass.json
+git clone https://github.com/Z3PHIRE/ShellForge.git; Set-Location .\ShellForge; Import-Module .\src\ShellForge\ShellForge.psd1 -Force; Get-Command -Module ShellForge
 ```
 
-### Linux avec `pwsh` depuis un clone Git
+### Linux avec `pwsh`
 
-Cloner le depot, importer le module, puis deployer un theme localement:
-
-```bash
-git clone https://github.com/<OWNER>/ShellForge.git
-cd ShellForge
-pwsh -NoProfile -Command "Import-Module ./src/ShellForge/ShellForge.psd1 -Force; Install-ShellForgeTheme -Path ./themes/cyberglass.json"
-```
-
-Version avec verification des commandes avant deploiement:
+Pour recuperer le code et charger le module:
 
 ```bash
-git clone https://github.com/<OWNER>/ShellForge.git
+git clone https://github.com/Z3PHIRE/ShellForge.git
 cd ShellForge
 pwsh -NoProfile -Command "Import-Module ./src/ShellForge/ShellForge.psd1 -Force; Get-Command -Module ShellForge"
-pwsh -NoProfile -Command "Import-Module ./src/ShellForge/ShellForge.psd1 -Force; Install-ShellForgeTheme -Path ./themes/cyberglass.json"
+```
+
+Version encore plus courte:
+
+```bash
+git clone https://github.com/Z3PHIRE/ShellForge.git && cd ShellForge && pwsh -NoProfile -Command "Import-Module ./src/ShellForge/ShellForge.psd1 -Force; Get-Command -Module ShellForge"
 ```
 
 ### Import local sans GitHub
@@ -127,63 +147,56 @@ Import-Module C:\Path\To\ShellForge\src\ShellForge\ShellForge.psd1 -Force
 Equivalent Linux:
 
 ```bash
-pwsh -NoProfile -Command "Import-Module /opt/ShellForge/src/ShellForge/ShellForge.psd1 -Force"
+pwsh -NoProfile -Command "Import-Module /opt/ShellForge/src/ShellForge/ShellForge.psd1 -Force; Get-Command -Module ShellForge"
 ```
 
 ### Deploiement prudent avec simulation
 
-Avant d'ecrire dans le profil utilisateur, utiliser `-WhatIf`:
+Quand un theme JSON sera ajoute dans `themes/`, utiliser `-WhatIf` avant toute ecriture dans le profil utilisateur:
 
 ```powershell
 Import-Module .\src\ShellForge\ShellForge.psd1 -Force
-Install-ShellForgeTheme -Path .\themes\cyberglass.json -WhatIf
+Install-ShellForgeTheme -Path .\themes\<theme>.json -WhatIf
 ```
 
 Equivalent Linux:
 
 ```bash
-pwsh -NoProfile -Command "Import-Module ./src/ShellForge/ShellForge.psd1 -Force; Install-ShellForgeTheme -Path ./themes/cyberglass.json -WhatIf"
+pwsh -NoProfile -Command "Import-Module ./src/ShellForge/ShellForge.psd1 -Force; Install-ShellForgeTheme -Path ./themes/<theme>.json -WhatIf"
 ```
 
 ## Bootstrap GitHub
 
-Ligne bootstrap distante a utiliser une fois le depot publie:
+Ligne bootstrap distante prevue pour le depot publie:
 
 ```powershell
-irm https://raw.githubusercontent.com/<OWNER>/ShellForge/main/bootstrap.ps1 | iex
+irm https://raw.githubusercontent.com/Z3PHIRE/ShellForge/main/bootstrap.ps1 | iex
 ```
 
 Alternative plus sure:
 
 ```powershell
 $bootstrapPath = Join-Path $env:TEMP 'bootstrap-shellforge.ps1'
-Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/<OWNER>/ShellForge/main/bootstrap.ps1' -OutFile $bootstrapPath
+Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/Z3PHIRE/ShellForge/main/bootstrap.ps1' -OutFile $bootstrapPath
 Get-Content $bootstrapPath
 pwsh -NoProfile -ExecutionPolicy Bypass -File $bootstrapPath
 ```
 
+Note: dans ce workspace, `bootstrap.ps1` n'est pas encore ajoute. La ligne ci-dessus est donc l'URL finale a publier, pas encore une commande exploitable localement.
+
 ## Demarrage rapide
 
-### Valider un theme
+### Charger le module
 
 ```powershell
 Import-Module .\src\ShellForge\ShellForge.psd1 -Force
-Test-ShellForgeTheme -Path .\themes\cyberglass.json
+Get-Command -Module ShellForge
 ```
 
-### Appliquer un theme a la session courante
+### Voir les commandes disponibles
 
 ```powershell
-Import-Module .\src\ShellForge\ShellForge.psd1 -Force
-Use-ShellForgeTheme -Path .\themes\cyberglass.json
-```
-
-### Installer un theme dans le profil utilisateur
-
-```powershell
-Import-Module .\src\ShellForge\ShellForge.psd1 -Force
-Install-ShellForgeTheme -Path .\themes\cyberglass.json -WhatIf
-Install-ShellForgeTheme -Path .\themes\cyberglass.json
+Get-Command -Module ShellForge
 ```
 
 ### Sauvegarder avant modification
@@ -289,7 +302,7 @@ Get-ShellForgeTheme -Path .\themes\cyberglass.json
 Valide un theme et retourne un resultat exploitable.
 
 ```powershell
-Test-ShellForgeTheme -Path .\themes\cyberglass.json
+Test-ShellForgeTheme -Path .\themes\<theme>.json
 ```
 
 ### `Use-ShellForgeTheme`
@@ -297,7 +310,7 @@ Test-ShellForgeTheme -Path .\themes\cyberglass.json
 Applique un theme a la session courante sans persistance profil.
 
 ```powershell
-Use-ShellForgeTheme -Path .\themes\cyberglass.json
+Use-ShellForgeTheme -Path .\themes\<theme>.json
 ```
 
 ### `Install-ShellForgeTheme`
@@ -305,7 +318,7 @@ Use-ShellForgeTheme -Path .\themes\cyberglass.json
 Persist le theme courant et injecte le bloc ShellForge dans le profil utilisateur.
 
 ```powershell
-Install-ShellForgeTheme -Path .\themes\cyberglass.json -UseOhMyPosh
+Install-ShellForgeTheme -Path .\themes\<theme>.json -UseOhMyPosh
 ```
 
 ### `Import-ShellForgeProfile`

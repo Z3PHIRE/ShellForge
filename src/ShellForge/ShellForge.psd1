@@ -27,10 +27,9 @@
     PrivateData       = @{
         PSData = @{
             Tags         = @('powershell', 'theme', 'prompt', 'terminal', 'deployment', 'psreadline', 'shellforge')
-            ProjectUri   = 'https://github.com/<OWNER>/ShellForge'
-            LicenseUri   = 'https://github.com/<OWNER>/ShellForge/blob/main/LICENSE'
+            ProjectUri   = 'https://github.com/Z3PHIRE/ShellForge'
+            LicenseUri   = 'https://github.com/Z3PHIRE/ShellForge/blob/main/LICENSE'
             ReleaseNotes = 'Initial production release with presets, custom builder, import/export and deployment.'
         }
     }
 }
-
