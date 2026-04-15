@@ -38,13 +38,15 @@ function Read-ShellForgeMenuSelection {
         [int[]]$AllowedValues,
 
         [Parameter()]
-        [Nullable[int]]$DefaultValue
+        [AllowNull()]
+        [int]$DefaultValue
     )
 
+    $hasDefaultValue = $PSBoundParameters.ContainsKey('DefaultValue') -and $null -ne $DefaultValue
     while ($true) {
         $rawInput = Read-Host -Prompt $Prompt
-        if ([string]::IsNullOrWhiteSpace($rawInput) -and $DefaultValue.HasValue) {
-            return $DefaultValue.Value
+        if ([string]::IsNullOrWhiteSpace($rawInput) -and $hasDefaultValue) {
+            return [int]$DefaultValue
         }
 
         try {

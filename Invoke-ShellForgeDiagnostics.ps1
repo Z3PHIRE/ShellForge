@@ -11,7 +11,10 @@ param(
     [switch]$KeepArtifacts,
 
     [Parameter()]
-    [string]$ReportPath = ''
+    [string]$ReportPath = '',
+
+    [Parameter()]
+    [switch]$PassThru
 )
 
 Set-StrictMode -Version Latest
@@ -57,6 +60,15 @@ function Get-DiagnosticPromptScriptBlock {
     }
 
     return $promptCommand.ScriptBlock
+}
+
+function Get-DiagnosticDefaultPromptScriptBlock {
+    [CmdletBinding()]
+    param()
+
+    return {
+        'PS {0}{1} ' -f (Get-Location), ('>' * ($nestedPromptLevel + 1))
+    }
 }
 
 function Restore-DiagnosticPrompt {
@@ -239,7 +251,7 @@ function Invoke-DiagnosticInteractiveMenuTest {
 
     $process = [System.Diagnostics.Process]::Start($processStartInfo)
     try {
-        $process.StandardInput.WriteLine('1')
+        $process.StandardInput.WriteLine('')
         $process.StandardInput.WriteLine('3')
         $process.StandardInput.WriteLine('')
         $process.StandardInput.WriteLine('0')
@@ -254,6 +266,24 @@ function Invoke-DiagnosticInteractiveMenuTest {
         $standardError = $process.StandardError.ReadToEnd()
         if ($process.ExitCode -ne 0) {
             throw ("Interactive menu test failed with exit code {0}.{1}{2}" -f $process.ExitCode, [Environment]::NewLine, $standardError)
+        }
+
+        if (-not [string]::IsNullOrWhiteSpace($standardError)) {
+            throw ("Interactive menu wrote to standard error:{0}{1}" -f [Environment]::NewLine, $standardError.Trim())
+        }
+
+        $interactiveErrorPatterns = @(
+            'Read-ShellForgeMenuSelection\s*:'
+            'PropertyNotFoundException'
+            'FullyQualifiedErrorId'
+            'CategoryInfo'
+            'Exception'
+        )
+
+        foreach ($interactiveErrorPattern in $interactiveErrorPatterns) {
+            if ($standardOutput -match $interactiveErrorPattern) {
+                throw ("Interactive menu output contains an error pattern '{0}'.{1}{2}" -f $interactiveErrorPattern, [Environment]::NewLine, $standardOutput.Trim())
+            }
         }
 
         return [pscustomobject]@{
@@ -342,6 +372,7 @@ $tempThemeRestorePath = Join-Path -Path $artifactsRoot -ChildPath 'restore-theme
 
 $initialLocation = (Get-Location).Path
 $initialPrompt = Get-DiagnosticPromptScriptBlock
+$defaultPrompt = Get-DiagnosticDefaultPromptScriptBlock
 $initialPSReadLineState = Get-DiagnosticPSReadLineState
 $moduleWasLoadedBeforeDiagnostic = ($null -ne (Get-Module -Name ShellForge))
 
@@ -406,7 +437,7 @@ try {
     }
 
     Invoke-DiagnosticStep -Name 'Get theme by path' -Results $results -ScriptBlock {
-        $themePath = Join-Path -Path $PSScriptRoot -ChildPath 'themes\amber-soc.json'
+        $themePath = Join-Path -Path $scriptRoot -ChildPath 'themes\amber-soc.json'
         $theme = Get-ShellForgeTheme -Path $themePath
         ('Theme loaded from path: {0}' -f $theme.Name)
     }
@@ -417,7 +448,7 @@ try {
     }
 
     Invoke-DiagnosticStep -Name 'Apply theme by path' -Results $results -ScriptBlock {
-        $themePath = Join-Path -Path $PSScriptRoot -ChildPath 'themes\amber-soc.json'
+        $themePath = Join-Path -Path $scriptRoot -ChildPath 'themes\amber-soc.json'
         $theme = Use-ShellForgeTheme -Path $themePath
         ('Applied theme from path: {0}' -f $theme.Name)
     }
@@ -438,7 +469,7 @@ try {
 
     Invoke-DiagnosticStep -Name 'Create backup and restore temp files' -Results $results -ScriptBlock {
         Set-Content -LiteralPath $tempProfileRestorePath -Value 'Write-Host ''before-restore''' -Encoding utf8
-        Copy-Item -LiteralPath (Join-Path -Path $PSScriptRoot -ChildPath 'themes\cyberglass.json') -Destination $tempThemeRestorePath -Force
+        Copy-Item -LiteralPath (Join-Path -Path $scriptRoot -ChildPath 'themes\cyberglass.json') -Destination $tempThemeRestorePath -Force
 
         $script:backupRecord = Backup-ShellForgeConfig -ProfilePath $tempProfileRestorePath -ThemePath $tempThemeRestorePath
         Set-Content -LiteralPath $tempProfileRestorePath -Value 'Write-Host ''after-backup''' -Encoding utf8
@@ -522,12 +553,13 @@ finally {
     }
 
     Restore-DiagnosticPSReadLineState -State $initialPSReadLineState
-    Restore-DiagnosticPrompt -PromptScriptBlock $initialPrompt
     Set-Location -Path $initialLocation
 
-    if (-not $moduleWasLoadedBeforeDiagnostic -and ($null -ne (Get-Module -Name ShellForge))) {
+    if ($null -ne (Get-Module -Name ShellForge)) {
         Remove-Module -Name ShellForge -Force -ErrorAction SilentlyContinue
     }
+
+    Restore-DiagnosticPrompt -PromptScriptBlock $defaultPrompt
 
     if (-not $KeepArtifacts.IsPresent -and (Test-Path -LiteralPath $artifactsRoot)) {
         Remove-Item -LiteralPath $artifactsRoot -Recurse -Force -ErrorAction SilentlyContinue
@@ -568,4 +600,6 @@ else {
     Write-Host 'All diagnostic steps completed successfully.' -ForegroundColor Green
 }
 
-return $summary
+if ($PassThru.IsPresent) {
+    return $summary
+}

@@ -20,10 +20,12 @@ function Select-ShellForgeTheme {
     Show-ShellForgeHeader -Title $Title -Subtitle $Subtitle
     for ($index = 0; $index -lt $availableThemes.Count; $index++) {
         $theme = $availableThemes[$index]
-        Write-ShellForgeMenuOption -Index ($index + 1) -Text ('{0} - {1}' -f $theme.Name, $theme.intent)
+        Write-ShellForgeMenuOption -Index ($index + 1) -Text $theme.Name
     }
 
     Write-ShellForgeMenuOption -Index 0 -Text 'Exit'
+    Write-Host ''
+    Write-Host 'Press Enter to select the first theme.' -ForegroundColor DarkGray
     $selection = Read-ShellForgeMenuSelection -Prompt 'Choose a theme' -AllowedValues @(0..$availableThemes.Count) -DefaultValue 1
     if ($selection -eq 0) {
         return $null
@@ -31,4 +33,3 @@ function Select-ShellForgeTheme {
 
     return $availableThemes[$selection - 1]
 }
-
