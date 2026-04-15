@@ -32,7 +32,7 @@ function Get-ShellForgeUiGlyph {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
-        [ValidateSet('LightHorizontal', 'HeavyHorizontal', 'DoubleHorizontal', 'DashedHorizontal', 'TopLeft', 'TopRight', 'BottomLeft', 'BottomRight', 'Vertical', 'SectionBar', 'Diamond', 'Pointer', 'MiddleDot', 'Block', 'Check', 'Cross')]
+        [ValidateSet('LightHorizontal', 'HeavyHorizontal', 'DoubleHorizontal', 'DashedHorizontal', 'TopLeft', 'TopRight', 'BottomLeft', 'BottomRight', 'Vertical', 'LeftDivider', 'RightDivider', 'SectionBar', 'Diamond', 'Pointer', 'MiddleDot', 'Block', 'Check', 'Cross')]
         [string]$Name
     )
 
@@ -46,6 +46,8 @@ function Get-ShellForgeUiGlyph {
         'BottomLeft' { return [string][char]0x255A }
         'BottomRight' { return [string][char]0x255D }
         'Vertical' { return [string][char]0x2551 }
+        'LeftDivider' { return [string][char]0x2560 }
+        'RightDivider' { return [string][char]0x2563 }
         'SectionBar' { return [string][char]0x258C }
         'Diamond' { return [string][char]0x25C6 }
         'Pointer' { return [string][char]0x25B8 }
@@ -85,7 +87,11 @@ function Write-ShellForgeDivider {
     param(
         [Parameter()]
         [ValidateSet('Light', 'Heavy', 'Double', 'Dash')]
-        [string]$Style = 'Light'
+        [string]$Style = 'Light',
+
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
+        [string]$HexColor = '#1E3040'
     )
 
     $consoleWidth = Get-ShellForgeConsoleWidth
@@ -98,7 +104,7 @@ function Write-ShellForgeDivider {
 
     $dividerText = $lineCharacter * $consoleWidth
     if (Test-ShellForgeVirtualTerminalSupport) {
-        Write-Host (Get-ShellForgeAnsiText -Text $dividerText -HexColor '#1E3040')
+        Write-Host (Get-ShellForgeAnsiText -Text $dividerText -HexColor $HexColor)
     }
     else {
         Write-Host $dividerText -ForegroundColor DarkGray
@@ -340,88 +346,257 @@ function Show-ShellForgeThemePreview {
     )
 
     $useAnsi = Test-ShellForgeVirtualTerminalSupport
-    $keyColor = '#3A5A6A'
+    $consoleWidth = Get-ShellForgeConsoleWidth
+    $innerWidth = $consoleWidth - 2
+    $borderColor = '#16303F'
+    $titleColor = '#E8F7FF'
     $valueColor = '#B0CCD8'
-    $nameColor = '#E8F7FF'
+    $keyColor = '#3A5A6A'
     $accentColor = '#4DD0E1'
+    $mutedColor = '#7B9BB7'
+    $successColor = '#2EE6A6'
+    $warningColor = '#F4B95D'
+    $errorColor = '#FF5D7A'
+    $lightHorizontal = Get-ShellForgeUiGlyph -Name 'LightHorizontal'
+    $doubleHorizontal = Get-ShellForgeUiGlyph -Name 'DoubleHorizontal'
+    $vertical = Get-ShellForgeUiGlyph -Name 'Vertical'
+    $topBorderRaw = (Get-ShellForgeUiGlyph -Name 'TopLeft') + ($doubleHorizontal * $innerWidth) + (Get-ShellForgeUiGlyph -Name 'TopRight')
+    $middleBorderRaw = (Get-ShellForgeUiGlyph -Name 'LeftDivider') + ($lightHorizontal * $innerWidth) + (Get-ShellForgeUiGlyph -Name 'RightDivider')
+    $bottomBorderRaw = (Get-ShellForgeUiGlyph -Name 'BottomLeft') + ($doubleHorizontal * $innerWidth) + (Get-ShellForgeUiGlyph -Name 'BottomRight')
+    $dividerText = '  ' + (Get-ShellForgeUiGlyph -Name 'MiddleDot') + '  '
+    $descriptor = Get-ShellForgeThemeDescriptor -Theme $Theme
+    $category = Get-ShellForgeThemeCategory -Theme $Theme
+    $checkGlyph = Get-ShellForgeUiGlyph -Name 'Check'
+    $crossGlyph = Get-ShellForgeUiGlyph -Name 'Cross'
+    $diamond = Get-ShellForgeUiGlyph -Name 'Diamond'
+    $pointer = Get-ShellForgeUiGlyph -Name 'Pointer'
 
-    function Write-PreviewRow {
+    function Write-ShellForgeCardLine {
         param(
             [Parameter(Mandatory)]
-            [string]$Key,
-
-            [Parameter(Mandatory)]
-            [string]$Value,
+            [AllowEmptyString()]
+            [string]$RawText,
 
             [Parameter()]
-            [string]$KeyHex = $keyColor,
+            [AllowEmptyString()]
+            [string]$StyledText = '',
 
             [Parameter()]
-            [string]$ValueHex = $valueColor
+            [string]$FallbackColor = 'White'
         )
 
+        $truncated = $RawText.Length -gt $innerWidth
+        $displayRaw = Get-ShellForgeFittedText -Text $RawText -Width $innerWidth
         if ($useAnsi) {
-            $keyText = Get-ShellForgeAnsiText -Text ('  ' + $Key.PadRight(18)) -HexColor $KeyHex
-            $valueText = Get-ShellForgeAnsiText -Text $Value -HexColor $ValueHex
-            Write-Host ('{0}{1}' -f $keyText, $valueText)
+            $contentText = $StyledText
+            if ($truncated -or [string]::IsNullOrWhiteSpace($contentText)) {
+                $contentText = Get-ShellForgeAnsiText -Text $displayRaw -HexColor $valueColor
+            }
+            else {
+                $paddingWidth = $innerWidth - $RawText.Length
+                if ($paddingWidth -lt 0) {
+                    $paddingWidth = 0
+                }
+
+                $contentText = $contentText + (' ' * $paddingWidth)
+            }
+
+            $leftBorder = Get-ShellForgeAnsiText -Text $vertical -HexColor $borderColor
+            $rightBorder = Get-ShellForgeAnsiText -Text $vertical -HexColor $borderColor
+            Write-Host ('{0}{1}{2}' -f $leftBorder, $contentText, $rightBorder)
+            return
         }
-        else {
-            Write-Host ('  {0,-18}{1}' -f $Key, $Value)
+
+        Write-Host ('{0}{1}{2}' -f $vertical, $displayRaw, $vertical) -ForegroundColor $FallbackColor
+    }
+
+    function Get-ShellForgeSegmentStateText {
+        param(
+            [Parameter(Mandatory)]
+            [string]$Label,
+
+            [Parameter(Mandatory)]
+            [bool]$Enabled
+        )
+
+        $markerRaw = if ($Enabled) { $checkGlyph } else { $crossGlyph }
+        $markerColor = if ($Enabled) { $successColor } else { $errorColor }
+        $labelColor = if ($Enabled) { $valueColor } else { $mutedColor }
+        $raw = '{0} {1}' -f $markerRaw, $Label
+        if (-not $useAnsi) {
+            return [pscustomobject]@{
+                Raw    = $raw
+                Styled = $raw
+            }
+        }
+
+        $styled = '{0} {1}' -f
+            (Get-ShellForgeAnsiText -Text $markerRaw -HexColor $markerColor),
+            (Get-ShellForgeAnsiText -Text $Label -HexColor $labelColor)
+
+        return [pscustomobject]@{
+            Raw    = $raw
+            Styled = $styled
         }
     }
 
-    function Write-CompatibilityRow {
+    function Join-ShellForgeCardParts {
         param(
             [Parameter(Mandatory)]
-            [bool]$State,
-
-            [Parameter(Mandatory)]
-            [string]$Label
+            [pscustomobject[]]$Items
         )
 
-        if ($useAnsi) {
-            $symbolText = if ($State) { ' ' + (Get-ShellForgeUiGlyph -Name 'Check') + ' ' } else { ' ' + (Get-ShellForgeUiGlyph -Name 'Cross') + ' ' }
-            $symbolColor = if ($State) { '#2EE6A6' } else { '#FF5D7A' }
-            $labelColor = if ($State) { '#7BDCB5' } else { '#7B9BB7' }
-            $symbol = Get-ShellForgeAnsiText -Text $symbolText -HexColor $symbolColor
-            $labelText = Get-ShellForgeAnsiText -Text $Label -HexColor $labelColor
-            Write-Host ('  {0}{1}' -f $symbol, $labelText)
+        $rawItems = [System.Collections.Generic.List[string]]::new()
+        $styledItems = [System.Collections.Generic.List[string]]::new()
+        foreach ($item in @($Items)) {
+            if ($null -eq $item) {
+                continue
+            }
+
+            [void]$rawItems.Add([string]$item.Raw)
+            [void]$styledItems.Add([string]$item.Styled)
         }
-        else {
-            $marker = if ($State) { '[ok]' } else { '[--]' }
-            Write-Host ('  {0} {1}' -f $marker, $Label)
+
+        $rawText = $rawItems -join '  '
+        $styledText = $styledItems -join '  '
+        return [pscustomobject]@{
+            Raw    = $rawText
+            Styled = $styledText
         }
     }
 
-    Write-ShellForgeSectionTitle -Title 'Identity'
-    Write-PreviewRow -Key 'Name' -Value $Theme.name -KeyHex $accentColor -ValueHex $nameColor
-    Write-PreviewRow -Key 'Category' -Value (Get-ShellForgeThemeCategory -Theme $Theme)
-    $layoutSeparator = '  ' + (Get-ShellForgeUiGlyph -Name 'MiddleDot') + '  '
-    Write-PreviewRow -Key 'Layout' -Value ('{0}{1}{2}{1}{3}' -f $Theme.promptLayout.type, $layoutSeparator, $Theme.promptLayout.lineMode, $Theme.promptLayout.density)
-    Write-PreviewRow -Key 'Intent' -Value [string]$Theme.intent
-    Write-PreviewRow -Key 'Description' -Value (Get-ShellForgeThemeDescriptor -Theme $Theme)
+    $topBorder = if ($useAnsi) { Get-ShellForgeAnsiText -Text $topBorderRaw -HexColor $borderColor } else { $topBorderRaw }
+    $middleBorder = if ($useAnsi) { Get-ShellForgeAnsiText -Text $middleBorderRaw -HexColor $borderColor } else { $middleBorderRaw }
+    $bottomBorder = if ($useAnsi) { Get-ShellForgeAnsiText -Text $bottomBorderRaw -HexColor $borderColor } else { $bottomBorderRaw }
+    if ($useAnsi) {
+        Write-Host $topBorder
+    }
+    else {
+        Write-Host $topBorder -ForegroundColor DarkCyan
+    }
 
-    Write-ShellForgeSectionTitle -Title 'Palette'
-    Write-Host ('  {0}' -f (Get-ShellForgePalettePreviewText -Theme $Theme))
+    $headerLeftRaw = '  ' + $diamond + '  ' + $Theme.name
+    $headerRightRaw = $category
+    $headerSpacing = $innerWidth - $headerLeftRaw.Length - $headerRightRaw.Length
+    if ($headerSpacing -lt 2) {
+        $headerSpacing = 2
+    }
 
-    Write-ShellForgeSectionTitle -Title 'Signal Design'
-    Write-PreviewRow -Key 'Primary' -Value (Get-ShellForgeThemeCoreSegments -Theme $Theme)
-    Write-PreviewRow -Key 'Context' -Value (Get-ShellForgeThemeContextSegments -Theme $Theme)
+    $headerRaw = $headerLeftRaw + (' ' * $headerSpacing) + $headerRightRaw
+    $headerStyled = ''
+    if ($useAnsi) {
+        $headerStyled = ('{0}{1}{2}' -f
+            (Get-ShellForgeAnsiText -Text ('  ' + $diamond + '  ') -HexColor $accentColor),
+            (Get-ShellForgeAnsiText -Text $Theme.name -HexColor $titleColor),
+            (Get-ShellForgeAnsiText -Text ((' ' * $headerSpacing) + $category) -HexColor $mutedColor))
+    }
+    Write-ShellForgeCardLine -RawText $headerRaw -StyledText $headerStyled -FallbackColor White
 
-    Write-ShellForgeSectionTitle -Title 'Terminal'
-    Write-PreviewRow -Key 'Font' -Value [string]$Theme.terminal.fontRecommendation
-    Write-PreviewRow -Key 'Background' -Value [string]$Theme.terminal.backgroundHex
-    Write-PreviewRow -Key 'Opacity' -Value ('{0}%' -f $Theme.terminal.opacityPercent)
-    Write-PreviewRow -Key 'Cursor' -Value [string]$Theme.terminal.cursorStyle
+    $descriptorRaw = '    ' + $descriptor
+    $descriptorStyled = if ($useAnsi) { Get-ShellForgeAnsiText -Text $descriptorRaw -HexColor $valueColor } else { '' }
+    Write-ShellForgeCardLine -RawText $descriptorRaw -StyledText $descriptorStyled -FallbackColor Gray
 
-    Write-ShellForgeSectionTitle -Title 'Compatibility'
-    Write-CompatibilityRow -State $Theme.compatibility.nativePromptSupported -Label 'Native prompt (no external dependency)'
-    Write-CompatibilityRow -State $Theme.compatibility.ohMyPoshProfileAvailable -Label 'Oh My Posh profile available'
-    Write-PreviewRow -Key 'Minimum PS' -Value [string]$Theme.compatibility.minimumPowerShell
+    if ($useAnsi) {
+        Write-Host $middleBorder
+    }
+    else {
+        Write-Host $middleBorder -ForegroundColor DarkCyan
+    }
 
-    Write-ShellForgeSectionTitle -Title 'Preview'
-    Write-PreviewRow -Key 'Prompt' -Value [string]$Theme.preview.promptExample -ValueHex '#9DD4E8'
-    Write-PreviewRow -Key 'Sample' -Value [string]$Theme.preview.sampleCommand
+    $palettePrefixRaw = '  Palette   '
+    $paletteRaw = 'bg sf ac a2 tx mu ok wa er'
+    $paletteStyled = ''
+    if ($useAnsi) {
+        $paletteStyled = (Get-ShellForgeAnsiText -Text $palettePrefixRaw -HexColor $keyColor) + (Get-ShellForgePalettePreviewText -Theme $Theme)
+    }
+    Write-ShellForgeCardLine -RawText ($palettePrefixRaw + $paletteRaw) -StyledText $paletteStyled -FallbackColor Gray
+
+    if ($useAnsi) {
+        Write-Host $middleBorder
+    }
+    else {
+        Write-Host $middleBorder -ForegroundColor DarkCyan
+    }
+
+    $segmentPrimary = Join-ShellForgeCardParts -Items @(
+        (Get-ShellForgeSegmentStateText -Label 'git' -Enabled ([bool]$Theme.segments.gitEnabled)),
+        (Get-ShellForgeSegmentStateText -Label 'status' -Enabled ([bool]$Theme.segments.statusEnabled)),
+        (Get-ShellForgeSegmentStateText -Label 'admin' -Enabled ([bool]$Theme.segments.adminEnabled)),
+        (Get-ShellForgeSegmentStateText -Label 'runtime' -Enabled ([bool]$Theme.segments.runtimeEnabled)),
+        (Get-ShellForgeSegmentStateText -Label 'exec' -Enabled ([bool]$Theme.segments.executionTimeEnabled))
+    )
+
+    $segmentContext = Join-ShellForgeCardParts -Items @(
+        (Get-ShellForgeSegmentStateText -Label 'clock' -Enabled ([bool]$Theme.segments.timeEnabled)),
+        (Get-ShellForgeSegmentStateText -Label 'host' -Enabled ([bool]$Theme.segments.hostEnabled)),
+        (Get-ShellForgeSegmentStateText -Label 'user' -Enabled ([bool]$Theme.segments.userEnabled)),
+        (Get-ShellForgeSegmentStateText -Label 'battery' -Enabled ([bool]$Theme.segments.batteryEnabled))
+    )
+
+    $segmentsPrefixRaw = '  Segments  '
+    $segmentsStyled = ''
+    if ($useAnsi) {
+        $segmentsStyled = (Get-ShellForgeAnsiText -Text $segmentsPrefixRaw -HexColor $keyColor) + $segmentPrimary.Styled
+    }
+    Write-ShellForgeCardLine -RawText ($segmentsPrefixRaw + $segmentPrimary.Raw) -StyledText $segmentsStyled -FallbackColor Gray
+
+    $segmentsContinuationRaw = '            ' + $segmentContext.Raw
+    $segmentsContinuationStyled = ''
+    if ($useAnsi) {
+        $segmentsContinuationStyled = (' ' * 12) + $segmentContext.Styled
+    }
+    Write-ShellForgeCardLine -RawText $segmentsContinuationRaw -StyledText $segmentsContinuationStyled -FallbackColor Gray
+
+    if ($useAnsi) {
+        Write-Host $middleBorder
+    }
+    else {
+        Write-Host $middleBorder -ForegroundColor DarkCyan
+    }
+
+    $layoutRaw = '  Layout    {0}{1}{2}{1}{3}{1}{4}' -f $Theme.promptLayout.type, $dividerText, $Theme.promptLayout.lineMode, $Theme.promptLayout.density, ('path:' + $Theme.segments.pathMode)
+    $layoutStyled = ''
+    if ($useAnsi) {
+        $layoutStyled = (Get-ShellForgeAnsiText -Text '  Layout    ' -HexColor $keyColor) + (Get-ShellForgeAnsiText -Text ($layoutRaw.Substring(12)) -HexColor $valueColor)
+    }
+    Write-ShellForgeCardLine -RawText $layoutRaw -StyledText $layoutStyled -FallbackColor Gray
+
+    $terminalValue = '{0}{1}{2}{1}{3}%' -f $Theme.terminal.fontRecommendation, $dividerText, $Theme.terminal.cursorStyle, $Theme.terminal.opacityPercent
+    $terminalRaw = '  Terminal  ' + $terminalValue
+    $terminalStyled = ''
+    if ($useAnsi) {
+        $terminalStyled = (Get-ShellForgeAnsiText -Text '  Terminal  ' -HexColor $keyColor) + (Get-ShellForgeAnsiText -Text $terminalValue -HexColor $valueColor)
+    }
+    Write-ShellForgeCardLine -RawText $terminalRaw -StyledText $terminalStyled -FallbackColor Gray
+
+    if ($useAnsi) {
+        Write-Host $middleBorder
+    }
+    else {
+        Write-Host $middleBorder -ForegroundColor DarkCyan
+    }
+
+    $previewPrefixRaw = '  ' + $pointer + '  '
+    $previewRaw = $previewPrefixRaw + [string]$Theme.preview.promptExample
+    $previewStyled = ''
+    if ($useAnsi) {
+        $previewStyled = (Get-ShellForgeAnsiText -Text $previewPrefixRaw -HexColor $accentColor) + (Get-ShellForgeAnsiText -Text ([string]$Theme.preview.promptExample) -HexColor '#9DD4E8')
+    }
+    Write-ShellForgeCardLine -RawText $previewRaw -StyledText $previewStyled -FallbackColor White
+
+    $sampleRaw = '  Sample    ' + [string]$Theme.preview.sampleCommand
+    $sampleStyled = ''
+    if ($useAnsi) {
+        $sampleStyled = (Get-ShellForgeAnsiText -Text '  Sample    ' -HexColor $keyColor) + (Get-ShellForgeAnsiText -Text ([string]$Theme.preview.sampleCommand) -HexColor $warningColor)
+    }
+    Write-ShellForgeCardLine -RawText $sampleRaw -StyledText $sampleStyled -FallbackColor Gray
+
+    if ($useAnsi) {
+        Write-Host $bottomBorder
+    }
+    else {
+        Write-Host $bottomBorder -ForegroundColor DarkCyan
+    }
     Write-Host ''
 }
 
