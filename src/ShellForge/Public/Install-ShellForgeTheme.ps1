@@ -44,7 +44,7 @@ function Install-ShellForgeTheme {
                     return $null
                 }
 
-                Resolve-ShellForgeTheme -Path $selectedTheme.SourcePath
+                $selectedTheme
             }
         }
 

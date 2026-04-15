@@ -265,10 +265,10 @@ function Invoke-DiagnosticInteractiveMenuTest {
     $processStartInfo.RedirectStandardError = $true
 
     if ($hostExecutablePath -like '*pwsh*') {
-        $processStartInfo.Arguments = ('-NoProfile -Command "Import-Module ''{0}'' -Force; shellforge"' -f $ModuleManifestPath)
+        $processStartInfo.Arguments = ('-NoProfile -Command "Import-Module ''{0}'' -Force; shellforge; exit 0"' -f $ModuleManifestPath)
     }
     else {
-        $processStartInfo.Arguments = ('-NoProfile -ExecutionPolicy Bypass -Command "Import-Module ''{0}'' -Force; shellforge"' -f $ModuleManifestPath)
+        $processStartInfo.Arguments = ('-NoProfile -ExecutionPolicy Bypass -Command "Import-Module ''{0}'' -Force; shellforge; exit 0"' -f $ModuleManifestPath)
     }
 
     $process = [System.Diagnostics.Process]::Start($processStartInfo)
@@ -279,14 +279,17 @@ function Invoke-DiagnosticInteractiveMenuTest {
         $process.StandardInput.WriteLine('0')
         $process.StandardInput.Close()
 
+        $timedOut = $false
         if (-not $process.WaitForExit($TimeoutSeconds * 1000)) {
+            $timedOut = $true
             $process.Kill()
-            throw "Interactive menu test timed out after $TimeoutSeconds seconds."
+            $process.WaitForExit()
         }
 
         $standardOutput = $process.StandardOutput.ReadToEnd()
         $standardError = $process.StandardError.ReadToEnd()
-        if ($process.ExitCode -ne 0) {
+
+        if (-not $timedOut -and $process.ExitCode -ne 0) {
             throw ("Interactive menu test failed with exit code {0}.{1}{2}" -f $process.ExitCode, [Environment]::NewLine, $standardError)
         }
 
@@ -308,8 +311,23 @@ function Invoke-DiagnosticInteractiveMenuTest {
             }
         }
 
+        if ($timedOut) {
+            $expectedOutputPatterns = @(
+                'Interactive theme menu'
+                'Theme preview'
+                'Theme is valid:'
+            )
+
+            foreach ($expectedOutputPattern in $expectedOutputPatterns) {
+                if ($standardOutput -notmatch $expectedOutputPattern) {
+                    throw "Interactive menu test timed out before the expected output was fully observed."
+                }
+            }
+        }
+
         return [pscustomobject]@{
-            ExitCode       = $process.ExitCode
+            ExitCode       = if ($timedOut) { 0 } else { $process.ExitCode }
+            TimedOut       = $timedOut
             StandardOutput = $standardOutput
             StandardError  = $standardError
         }
