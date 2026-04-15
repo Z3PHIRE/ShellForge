@@ -28,7 +28,7 @@ else {
 }
 
 if ([string]::IsNullOrWhiteSpace($ReportPath)) {
-    $ReportPath = Join-Path -Path $scriptRoot -ChildPath 'ShellForge.Diagnostics.Report.json'
+    $ReportPath = ''
 }
 
 function ConvertTo-DiagnosticText {
@@ -48,6 +48,28 @@ function ConvertTo-DiagnosticText {
     }
 
     return (($InputObject | Out-String).Trim())
+}
+
+function Get-DiagnosticDefaultReportPath {
+    [CmdletBinding()]
+    param()
+
+    $baseDirectory = ''
+    if (-not [string]::IsNullOrWhiteSpace($env:LOCALAPPDATA)) {
+        $baseDirectory = Join-Path -Path $env:LOCALAPPDATA -ChildPath 'ShellForge\diagnostics'
+    }
+    elseif (-not [string]::IsNullOrWhiteSpace($HOME)) {
+        $baseDirectory = Join-Path -Path $HOME -ChildPath '.shellforge\diagnostics'
+    }
+    else {
+        $baseDirectory = Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath 'ShellForge\diagnostics'
+    }
+
+    if (-not (Test-Path -LiteralPath $baseDirectory)) {
+        New-Item -ItemType Directory -Path $baseDirectory -Force | Out-Null
+    }
+
+    return (Join-Path -Path $baseDirectory -ChildPath 'ShellForge.Diagnostics.Report.json')
 }
 
 function Get-DiagnosticPromptScriptBlock {
@@ -362,6 +384,10 @@ if (-not (Test-Path -LiteralPath $moduleManifestPath)) {
     throw "ShellForge module manifest not found: $moduleManifestPath"
 }
 
+if ([string]::IsNullOrWhiteSpace($ReportPath)) {
+    $ReportPath = Get-DiagnosticDefaultReportPath
+}
+
 $results = [System.Collections.Generic.List[object]]::new()
 $artifactsRoot = [System.IO.Path]::GetFullPath((Join-Path -Path ([System.IO.Path]::GetTempPath()) -ChildPath ('ShellForge-Diagnostic-' + ([Guid]::NewGuid().ToString('N')))))
 New-Item -ItemType Directory -Path $artifactsRoot -Force | Out-Null
@@ -566,10 +592,16 @@ finally {
     }
 }
 
+$resolvedReportPath = [System.IO.Path]::GetFullPath($ReportPath)
+$reportDirectoryPath = Split-Path -Path $resolvedReportPath -Parent
+if (-not [string]::IsNullOrWhiteSpace($reportDirectoryPath) -and -not (Test-Path -LiteralPath $reportDirectoryPath)) {
+    New-Item -ItemType Directory -Path $reportDirectoryPath -Force | Out-Null
+}
+
 $summary = [pscustomobject]@{
     generatedAtUtc = [DateTimeOffset]::UtcNow.ToString('o')
     repositoryRoot = $scriptRoot
-    reportPath     = [System.IO.Path]::GetFullPath($ReportPath)
+    reportPath     = $resolvedReportPath
     totalSteps     = $results.Count
     passedSteps    = @($results | Where-Object { $_.Status -eq 'Passed' }).Count
     failedSteps    = @($results | Where-Object { $_.Status -eq 'Failed' }).Count
@@ -578,7 +610,7 @@ $summary = [pscustomobject]@{
 }
 
 $summaryJson = $summary | ConvertTo-Json -Depth 10
-Set-Content -LiteralPath ([System.IO.Path]::GetFullPath($ReportPath)) -Value $summaryJson -Encoding utf8
+Set-Content -LiteralPath $resolvedReportPath -Value $summaryJson -Encoding utf8
 
 Write-Host ''
 Write-Host '============================================================' -ForegroundColor DarkGray

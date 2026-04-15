@@ -88,10 +88,95 @@ function Invoke-BootstrapGit {
         }
     }
 
+    function Invoke-BootstrapGitQuery {
+        [CmdletBinding()]
+        param(
+            [Parameter(Mandatory)]
+            [string[]]$Arguments
+        )
+
+        $previousErrorActionPreference = $ErrorActionPreference
+        try {
+            $ErrorActionPreference = 'Continue'
+            $output = & $gitCommand.Source @Arguments 2>&1
+            $exitCode = $LASTEXITCODE
+        }
+        finally {
+            $ErrorActionPreference = $previousErrorActionPreference
+        }
+
+        if ($exitCode -ne 0) {
+            throw ("Git command failed with exit code {0}: git {1}" -f $exitCode, ($Arguments -join ' '))
+        }
+
+        return @($output | ForEach-Object { [string]$_ })
+    }
+
+    function Protect-BootstrapWorkingTree {
+        [CmdletBinding()]
+        param(
+            [Parameter(Mandatory)]
+            [ValidateNotNullOrEmpty()]
+            [string]$WorkingRepositoryPath
+        )
+
+        $generatedArtifactPaths = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+        [void]$generatedArtifactPaths.Add('ShellForge.Diagnostics.Report.json')
+
+        $statusLines = @(Invoke-BootstrapGitQuery -Arguments @('-C', $WorkingRepositoryPath, 'status', '--porcelain', '--untracked-files=no'))
+        if ($statusLines.Count -eq 0) {
+            return
+        }
+
+        $restorablePaths = [System.Collections.Generic.List[string]]::new()
+        $unsafePaths = [System.Collections.Generic.List[string]]::new()
+
+        foreach ($statusLine in $statusLines) {
+            if ([string]::IsNullOrWhiteSpace($statusLine)) {
+                continue
+            }
+
+            if ($statusLine.Length -lt 4) {
+                continue
+            }
+
+            $pathText = $statusLine.Substring(3).Trim()
+            if ([string]::IsNullOrWhiteSpace($pathText)) {
+                continue
+            }
+
+            if ($pathText.Contains(' -> ')) {
+                $pathText = ($pathText.Split(' -> ')[-1]).Trim()
+            }
+
+            if ($generatedArtifactPaths.Contains($pathText)) {
+                [void]$restorablePaths.Add($pathText)
+            }
+            else {
+                [void]$unsafePaths.Add($pathText)
+            }
+        }
+
+        if ($unsafePaths.Count -gt 0) {
+            throw ('ShellForge update stopped because local changes were detected: {0}. Commit, stash, or restore these files, then rerun bootstrap.' -f ($unsafePaths -join ', '))
+        }
+
+        foreach ($restorablePath in $restorablePaths) {
+            Write-Host ("Restoring generated ShellForge artifact before update: {0}" -f $restorablePath) -ForegroundColor Yellow
+            try {
+                Invoke-BootstrapGitCommand -Arguments @('-C', $WorkingRepositoryPath, 'restore', '--source=HEAD', '--worktree', '--', $restorablePath)
+            }
+            catch {
+                Invoke-BootstrapGitCommand -Arguments @('-C', $WorkingRepositoryPath, 'checkout', '--', $restorablePath)
+            }
+        }
+    }
+
     $gitMetadataPath = Join-Path -Path $RepositoryPath -ChildPath '.git'
     if (Test-Path -LiteralPath $gitMetadataPath) {
         Write-Host 'Updating ShellForge repository...' -ForegroundColor Cyan
         Invoke-BootstrapGitCommand -Arguments @('-C', $RepositoryPath, 'fetch', 'origin', $Branch, '--prune')
+        Protect-BootstrapWorkingTree -WorkingRepositoryPath $RepositoryPath
         Invoke-BootstrapGitCommand -Arguments @('-C', $RepositoryPath, 'checkout', $Branch)
         Invoke-BootstrapGitCommand -Arguments @('-C', $RepositoryPath, 'merge', '--ff-only', ('origin/{0}' -f $Branch))
         return 'Updated'
