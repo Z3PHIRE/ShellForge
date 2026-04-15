@@ -11,22 +11,58 @@ Si tu veux juste recuperer le code et charger le module, copie-colle seulement c
 
 ### Windows PowerShell ou PowerShell 7
 
+Fais les lignes dans cet ordre.
+Commence dans ton dossier utilisateur, pas dans `C:\Windows\System32`.
+
 ```powershell
+Set-Location $HOME
 git clone https://github.com/Z3PHIRE/ShellForge.git
 Set-Location .\ShellForge
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 Import-Module .\src\ShellForge\ShellForge.psd1 -Force
 Get-Command -Module ShellForge
 ```
 
 ### Linux avec `pwsh`
 
+Fais les lignes dans cet ordre.
+
 ```bash
+cd ~
 git clone https://github.com/Z3PHIRE/ShellForge.git
 cd ShellForge
 pwsh -NoProfile -Command "Import-Module ./src/ShellForge/ShellForge.psd1 -Force; Get-Command -Module ShellForge"
 ```
 
 Si tu vois la liste des commandes ShellForge, c'est bon: le code est importe.
+
+## Si tu as une erreur
+
+### Erreur: `Impossible de trouver le chemin ...\ShellForge`
+
+Tu as essaye d'entrer dans le dossier `ShellForge` avant de le telecharger.
+
+Ordre correct:
+
+```powershell
+Set-Location $HOME
+git clone https://github.com/Z3PHIRE/ShellForge.git
+Set-Location .\ShellForge
+```
+
+### Erreur: `L’execution de scripts est desactivee sur ce systeme`
+
+Sous Windows PowerShell, ajoute cette ligne avant `Import-Module`:
+
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+```
+
+Cette commande est temporaire:
+
+- elle ne change rien pour tout le PC
+- elle ne dure que pour la fenetre PowerShell en cours
+- elle sert juste a laisser PowerShell charger le module
 
 ## Etat du depot
 
@@ -108,8 +144,10 @@ Get-Command -Module ShellForge
 Pour recuperer le code et charger le module:
 
 ```powershell
+Set-Location $HOME
 git clone https://github.com/Z3PHIRE/ShellForge.git
 Set-Location .\ShellForge
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
 Import-Module .\src\ShellForge\ShellForge.psd1 -Force
 Get-Command -Module ShellForge
 ```
@@ -117,7 +155,7 @@ Get-Command -Module ShellForge
 Version en une seule ligne:
 
 ```powershell
-git clone https://github.com/Z3PHIRE/ShellForge.git; Set-Location .\ShellForge; Import-Module .\src\ShellForge\ShellForge.psd1 -Force; Get-Command -Module ShellForge
+Set-Location $HOME; git clone https://github.com/Z3PHIRE/ShellForge.git; Set-Location .\ShellForge; Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force; Import-Module .\src\ShellForge\ShellForge.psd1 -Force; Get-Command -Module ShellForge
 ```
 
 ### Linux avec `pwsh`
@@ -125,6 +163,7 @@ git clone https://github.com/Z3PHIRE/ShellForge.git; Set-Location .\ShellForge; 
 Pour recuperer le code et charger le module:
 
 ```bash
+cd ~
 git clone https://github.com/Z3PHIRE/ShellForge.git
 cd ShellForge
 pwsh -NoProfile -Command "Import-Module ./src/ShellForge/ShellForge.psd1 -Force; Get-Command -Module ShellForge"
@@ -133,7 +172,7 @@ pwsh -NoProfile -Command "Import-Module ./src/ShellForge/ShellForge.psd1 -Force;
 Version encore plus courte:
 
 ```bash
-git clone https://github.com/Z3PHIRE/ShellForge.git && cd ShellForge && pwsh -NoProfile -Command "Import-Module ./src/ShellForge/ShellForge.psd1 -Force; Get-Command -Module ShellForge"
+cd ~ && git clone https://github.com/Z3PHIRE/ShellForge.git && cd ShellForge && pwsh -NoProfile -Command "Import-Module ./src/ShellForge/ShellForge.psd1 -Force; Get-Command -Module ShellForge"
 ```
 
 ### Import local sans GitHub
