@@ -1,0 +1,123 @@
+﻿{
+    "generatedAtUtc":  "2026-04-15T08:59:10.3709660+00:00",
+    "repositoryRoot":  "C:\\Users\\Personne\\OneDrive\\Documents\\Projets_Dev\\Programme Web\\jeux code html\\ShellForge",
+    "reportPath":  "C:\\Users\\Personne\\OneDrive\\Documents\\Projets_Dev\\Programme Web\\jeux code html\\ShellForge\\ShellForge.Diagnostics.Report.json",
+    "totalSteps":  14,
+    "passedSteps":  14,
+    "failedSteps":  0,
+    "keepArtifacts":  false,
+    "results":  [
+                    {
+                        "Name":  "Import module",
+                        "Status":  "Passed",
+                        "DurationMs":  760,
+                        "Output":  "Module imported successfully.",
+                        "ErrorMessage":  "",
+                        "ExceptionType":  ""
+                    },
+                    {
+                        "Name":  "List public commands",
+                        "Status":  "Passed",
+                        "DurationMs":  8,
+                        "Output":  "Backup-ShellForgeConfig, Get-ShellForgeTheme, Import-ShellForgeProfile, Install-ShellForgeTheme, Invoke-ShellForge, New-ShellForgeTheme, Restore-ShellForgeConfig, Test-ShellForgeTheme, Use-ShellForgeTheme",
+                        "ErrorMessage":  "",
+                        "ExceptionType":  ""
+                    },
+                    {
+                        "Name":  "List built-in themes",
+                        "Status":  "Passed",
+                        "DurationMs":  429,
+                        "Output":  "Amber SOC, Arctic Void, CyberGlass, Eclipse Matrix, Graphite Pulse, Neon Grid, Obsidian Nord, Purple Forge, Red Tactical",
+                        "ErrorMessage":  "",
+                        "ExceptionType":  ""
+                    },
+                    {
+                        "Name":  "Validate all themes",
+                        "Status":  "Passed",
+                        "DurationMs":  229,
+                        "Output":  "Validated 9 themes.",
+                        "ErrorMessage":  "",
+                        "ExceptionType":  ""
+                    },
+                    {
+                        "Name":  "Get theme by name",
+                        "Status":  "Passed",
+                        "DurationMs":  52,
+                        "Output":  "Theme loaded: CyberGlass (cyberglass)",
+                        "ErrorMessage":  "",
+                        "ExceptionType":  ""
+                    },
+                    {
+                        "Name":  "Get theme by path",
+                        "Status":  "Passed",
+                        "DurationMs":  13,
+                        "Output":  "Theme loaded from path: Amber SOC",
+                        "ErrorMessage":  "",
+                        "ExceptionType":  ""
+                    },
+                    {
+                        "Name":  "Apply theme by name",
+                        "Status":  "Passed",
+                        "DurationMs":  131,
+                        "Output":  "Applied theme: CyberGlass",
+                        "ErrorMessage":  "",
+                        "ExceptionType":  ""
+                    },
+                    {
+                        "Name":  "Apply theme by path",
+                        "Status":  "Passed",
+                        "DurationMs":  22,
+                        "Output":  "Applied theme from path: Amber SOC",
+                        "ErrorMessage":  "",
+                        "ExceptionType":  ""
+                    },
+                    {
+                        "Name":  "Create custom theme object",
+                        "Status":  "Passed",
+                        "DurationMs":  48,
+                        "Output":  "Generated theme: Diagnostic Forge",
+                        "ErrorMessage":  "",
+                        "ExceptionType":  ""
+                    },
+                    {
+                        "Name":  "Validate generated theme",
+                        "Status":  "Passed",
+                        "DurationMs":  7,
+                        "Output":  "Generated theme is valid: Diagnostic Forge",
+                        "ErrorMessage":  "",
+                        "ExceptionType":  ""
+                    },
+                    {
+                        "Name":  "Create backup and restore temp files",
+                        "Status":  "Passed",
+                        "DurationMs":  199,
+                        "Output":  "Backup and restore succeeded with backup id 20260415T085907Z-2f07af95.",
+                        "ErrorMessage":  "",
+                        "ExceptionType":  ""
+                    },
+                    {
+                        "Name":  "Install theme into temp profile",
+                        "Status":  "Passed",
+                        "DurationMs":  147,
+                        "Output":  "Installed theme: Arctic Void",
+                        "ErrorMessage":  "",
+                        "ExceptionType":  ""
+                    },
+                    {
+                        "Name":  "Import current ShellForge profile theme",
+                        "Status":  "Passed",
+                        "DurationMs":  32,
+                        "Output":  "Imported theme: Arctic Void",
+                        "ErrorMessage":  "",
+                        "ExceptionType":  ""
+                    },
+                    {
+                        "Name":  "Run interactive menu smoke test",
+                        "Status":  "Passed",
+                        "DurationMs":  2414,
+                        "Output":  "Interactive menu completed successfully.",
+                        "ErrorMessage":  "",
+                        "ExceptionType":  ""
+                    }
+                ]
+}

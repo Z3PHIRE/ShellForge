@@ -13,7 +13,7 @@ function Set-ShellForgePSReadLine {
         return
     }
 
-    $colorTable = @{
+    $colorTable = [ordered]@{
         Command            = $Theme.psReadLine.colors.Command
         Comment            = $Theme.psReadLine.colors.Comment
         Keyword            = $Theme.psReadLine.colors.Keyword
@@ -30,5 +30,19 @@ function Set-ShellForgePSReadLine {
         ContinuationPrompt = $Theme.psReadLine.continuationPrompt
     }
 
-    Set-PSReadLineOption -EditMode $Theme.psReadLine.editMode -Colors $colorTable
+    try {
+        Set-PSReadLineOption -EditMode $Theme.psReadLine.editMode
+    }
+    catch {
+        Write-ShellForgeLog -Level 'WARN' -Operation 'PSReadLine' -Message ("Unable to set PSReadLine edit mode '{0}'. {1}" -f $Theme.psReadLine.editMode, $_.Exception.Message)
+    }
+
+    foreach ($colorEntry in $colorTable.GetEnumerator()) {
+        try {
+            Set-PSReadLineOption -Colors @{ $colorEntry.Key = $colorEntry.Value }
+        }
+        catch {
+            Write-ShellForgeLog -Level 'WARN' -Operation 'PSReadLine' -Message ("Skipping unsupported PSReadLine color '{0}'. {1}" -f $colorEntry.Key, $_.Exception.Message)
+        }
+    }
 }
