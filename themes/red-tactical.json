@@ -1,0 +1,79 @@
+{
+  "schemaVersion": "1.0",
+  "name": "Red Tactical",
+  "slug": "red-tactical",
+  "description": "Charcoal tactical prompt with red state markers and sand accents.",
+  "intent": "Status-first operations prompt designed to make failure, elevation and runtime visibility obvious.",
+  "promptLayout": {
+    "type": "Tactical",
+    "density": "Medium",
+    "lineMode": "SingleLine",
+    "separatorStyle": "StatusFirst",
+    "promptSymbol": "#>",
+    "adminWarningStyle": "Banner"
+  },
+  "palette": {
+    "background": "#121212",
+    "surface": "#232323",
+    "accent": "#B24141",
+    "accentSecondary": "#E8C39E",
+    "text": "#F6EFE6",
+    "muted": "#9B9187",
+    "success": "#6FD8A1",
+    "warning": "#E7A15C",
+    "error": "#ED5C5C",
+    "info": "#C5B190"
+  },
+  "segments": {
+    "gitEnabled": true,
+    "adminEnabled": true,
+    "statusEnabled": true,
+    "runtimeEnabled": true,
+    "executionTimeEnabled": true,
+    "batteryEnabled": false,
+    "timeEnabled": true,
+    "hostEnabled": true,
+    "userEnabled": false,
+    "pathMode": "Short"
+  },
+  "iconDensity": "Medium",
+  "psReadLine": {
+    "editMode": "Windows",
+    "predictionColor": "#9B9187",
+    "continuationPrompt": "#9B9187",
+    "colors": {
+      "Command": "#B24141",
+      "Comment": "#9B9187",
+      "Keyword": "#E8C39E",
+      "String": "#F6EFE6",
+      "Number": "#E7A15C",
+      "Operator": "#F6EFE6",
+      "Variable": "#C5B190",
+      "Member": "#E8C39E",
+      "Parameter": "#B24141",
+      "Type": "#E7A15C",
+      "Selection": "#232323",
+      "InlinePrediction": "#9B9187",
+      "Error": "#ED5C5C"
+    }
+  },
+  "terminal": {
+    "backgroundHex": "#121212",
+    "opacityPercent": 94,
+    "cursorStyle": "Block",
+    "fontRecommendation": "CaskaydiaCove Nerd Font"
+  },
+  "compatibility": {
+    "nativePromptSupported": true,
+    "ohMyPoshProfileAvailable": true,
+    "minimumPowerShell": "5.1",
+    "notes": [
+      "Tuned for operational shells and admin-aware workflows.",
+      "Best when error visibility matters more than visual silence."
+    ]
+  },
+  "preview": {
+    "sampleCommand": "Get-Service | Where-Object Status -eq 'Running'",
+    "promptExample": "Red Tactical < ops state online >"
+  }
+}

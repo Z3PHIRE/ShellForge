@@ -7,34 +7,28 @@ GitHub short description:
 
 ## Utilisation ultra simple
 
-Si tu veux juste recuperer le code et charger le module, copie-colle seulement ca.
+Si tu veux juste installer ou mettre a jour ShellForge, copie-colle une seule commande.
 
 ### Windows PowerShell ou PowerShell 7
 
-Fais les lignes dans cet ordre.
-Commence dans ton dossier utilisateur, pas dans `C:\Windows\System32`.
-
 ```powershell
-Set-Location $HOME
-git clone https://github.com/Z3PHIRE/ShellForge.git
-Set-Location .\ShellForge
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
-Import-Module .\src\ShellForge\ShellForge.psd1 -Force
-Get-Command -Module ShellForge
+irm https://raw.githubusercontent.com/Z3PHIRE/ShellForge/main/bootstrap.ps1 | iex
 ```
 
 ### Linux avec `pwsh`
 
-Fais les lignes dans cet ordre.
-
 ```bash
-cd ~
-git clone https://github.com/Z3PHIRE/ShellForge.git
-cd ShellForge
-pwsh -NoProfile -Command "Import-Module ./src/ShellForge/ShellForge.psd1 -Force; Get-Command -Module ShellForge"
+pwsh -NoProfile -Command "irm https://raw.githubusercontent.com/Z3PHIRE/ShellForge/main/bootstrap.ps1 | iex"
 ```
 
-Si tu vois la liste des commandes ShellForge, c'est bon: le code est importe.
+Cette meme commande sert aussi plus tard pour la mise a jour.
+
+## Guide simple
+
+Si tu veux un guide pas-a-pas lisible directement sur GitHub:
+
+- [Prise En Main](./docs/PRISE-EN-MAIN.md)
 
 ## Si tu as une erreur
 
@@ -69,14 +63,14 @@ Cette commande est temporaire:
 Le depot contient deja le socle du produit:
 
 - module PowerShell structure (`src/ShellForge`)
+- 9 themes integres dans `themes/`
 - validation stricte du schema de theme
 - moteur de prompt natif ShellForge
 - integration PSReadLine
 - sauvegarde et restauration des fichiers ShellForge
 - integration sûre dans le profil PowerShell
-- base du custom builder, du moteur UI et des packs `.sfpack`
-
-Important: les presets JSON dans `themes/` ne sont pas encore ajoutes dans ce workspace. Les commandes qui appliquent un theme ont donc besoin qu'un theme soit ajoute avant utilisation.
+- menu interactif `shellforge`
+- base du custom builder et des packs `.sfpack`
 
 ## Vision produit
 
@@ -97,6 +91,8 @@ ShellForge a pour objectif d’apporter un vrai workflow “theme studio + deplo
 - `Use-ShellForgeTheme`
 - `Install-ShellForgeTheme`
 - `Import-ShellForgeProfile`
+- `Invoke-ShellForge`
+- `New-ShellForgeTheme`
 - `Backup-ShellForgeConfig`
 - `Restore-ShellForgeConfig`
 
@@ -141,38 +137,31 @@ Get-Command -Module ShellForge
 
 ### Windows PowerShell ou PowerShell 7
 
-Pour recuperer le code et charger le module:
+Pour installer ou mettre a jour ShellForge:
 
 ```powershell
-Set-Location $HOME
-git clone https://github.com/Z3PHIRE/ShellForge.git
-Set-Location .\ShellForge
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
-Import-Module .\src\ShellForge\ShellForge.psd1 -Force
-Get-Command -Module ShellForge
+irm https://raw.githubusercontent.com/Z3PHIRE/ShellForge/main/bootstrap.ps1 | iex
 ```
 
 Version en une seule ligne:
 
 ```powershell
-Set-Location $HOME; git clone https://github.com/Z3PHIRE/ShellForge.git; Set-Location .\ShellForge; Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force; Import-Module .\src\ShellForge\ShellForge.psd1 -Force; Get-Command -Module ShellForge
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force; irm https://raw.githubusercontent.com/Z3PHIRE/ShellForge/main/bootstrap.ps1 | iex
 ```
 
 ### Linux avec `pwsh`
 
-Pour recuperer le code et charger le module:
+Pour installer ou mettre a jour ShellForge:
 
 ```bash
-cd ~
-git clone https://github.com/Z3PHIRE/ShellForge.git
-cd ShellForge
-pwsh -NoProfile -Command "Import-Module ./src/ShellForge/ShellForge.psd1 -Force; Get-Command -Module ShellForge"
+pwsh -NoProfile -Command "irm https://raw.githubusercontent.com/Z3PHIRE/ShellForge/main/bootstrap.ps1 | iex"
 ```
 
 Version encore plus courte:
 
 ```bash
-cd ~ && git clone https://github.com/Z3PHIRE/ShellForge.git && cd ShellForge && pwsh -NoProfile -Command "Import-Module ./src/ShellForge/ShellForge.psd1 -Force; Get-Command -Module ShellForge"
+pwsh -NoProfile -Command "irm https://raw.githubusercontent.com/Z3PHIRE/ShellForge/main/bootstrap.ps1 | iex"
 ```
 
 ### Import local sans GitHub
@@ -206,7 +195,7 @@ pwsh -NoProfile -Command "Import-Module ./src/ShellForge/ShellForge.psd1 -Force;
 
 ## Bootstrap GitHub
 
-Ligne bootstrap distante prevue pour le depot publie:
+Ligne bootstrap distante:
 
 ```powershell
 irm https://raw.githubusercontent.com/Z3PHIRE/ShellForge/main/bootstrap.ps1 | iex
@@ -221,27 +210,48 @@ Get-Content $bootstrapPath
 pwsh -NoProfile -ExecutionPolicy Bypass -File $bootstrapPath
 ```
 
-Note: dans ce workspace, `bootstrap.ps1` n'est pas encore ajoute. La ligne ci-dessus est donc l'URL finale a publier, pas encore une commande exploitable localement.
-
 ## Demarrage rapide
 
-### Charger le module
+### Installer ou mettre a jour
 
 ```powershell
-Import-Module .\src\ShellForge\ShellForge.psd1 -Force
-Get-Command -Module ShellForge
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force
+irm https://raw.githubusercontent.com/Z3PHIRE/ShellForge/main/bootstrap.ps1 | iex
 ```
 
-### Voir les commandes disponibles
+### Ouvrir le menu interactif
 
 ```powershell
-Get-Command -Module ShellForge
+shellforge
+```
+
+### Voir les themes disponibles
+
+```powershell
+Get-ShellForgeTheme
+```
+
+### Appliquer un theme avec une selection interactive
+
+```powershell
+Use-ShellForgeTheme
+```
+
+### Appliquer un theme directement
+
+```powershell
+Use-ShellForgeTheme -Name CyberGlass
+```
+
+### Installer un theme dans le profil
+
+```powershell
+Install-ShellForgeTheme
 ```
 
 ### Sauvegarder avant modification
 
 ```powershell
-Backup-ShellForgeConfig -WhatIf
 Backup-ShellForgeConfig
 ```
 
@@ -333,6 +343,7 @@ Liste les themes du depot/local library ou retourne un theme specifique.
 ```powershell
 Get-ShellForgeTheme
 Get-ShellForgeTheme -Current
+Get-ShellForgeTheme -Name CyberGlass
 Get-ShellForgeTheme -Path .\themes\cyberglass.json
 ```
 
@@ -341,6 +352,7 @@ Get-ShellForgeTheme -Path .\themes\cyberglass.json
 Valide un theme et retourne un resultat exploitable.
 
 ```powershell
+Test-ShellForgeTheme
 Test-ShellForgeTheme -Path .\themes\<theme>.json
 ```
 
@@ -349,7 +361,9 @@ Test-ShellForgeTheme -Path .\themes\<theme>.json
 Applique un theme a la session courante sans persistance profil.
 
 ```powershell
+Use-ShellForgeTheme
 Use-ShellForgeTheme -Path .\themes\<theme>.json
+Use-ShellForgeTheme -Name CyberGlass
 ```
 
 ### `Install-ShellForgeTheme`
@@ -357,7 +371,9 @@ Use-ShellForgeTheme -Path .\themes\<theme>.json
 Persist le theme courant et injecte le bloc ShellForge dans le profil utilisateur.
 
 ```powershell
+Install-ShellForgeTheme
 Install-ShellForgeTheme -Path .\themes\<theme>.json -UseOhMyPosh
+Install-ShellForgeTheme -Name "Arctic Void"
 ```
 
 ### `Import-ShellForgeProfile`
@@ -384,16 +400,47 @@ Restaure un backup specifique ou le plus recent.
 Restore-ShellForgeConfig -Latest
 ```
 
+### `Invoke-ShellForge`
+
+Ouvre le menu interactif.
+
+```powershell
+shellforge
+Invoke-ShellForge
+```
+
+### `New-ShellForgeTheme`
+
+Lance le builder interactif.
+
+```powershell
+New-ShellForgeTheme
+```
+
 ## Builder et TUI
 
 Le code du depot contient deja:
 
 - helpers de rendu console
 - parsing numerique robuste
-- squelette du custom builder interactif
-- construction d’un objet de theme a partir de choix numeriques
+- selection numerique de themes integres
+- apercu d'un theme avant application
+- installation interactive dans le profil
+- custom builder interactif
 
 Le prochain branchement consiste a exposer ce flux via `Invoke-ShellForge` et a y raccorder les presets officiels.
+
+## Themes integres
+
+- CyberGlass
+- Arctic Void
+- Red Tactical
+- Neon Grid
+- Obsidian Nord
+- Amber SOC
+- Purple Forge
+- Graphite Pulse
+- Eclipse Matrix
 
 ## Import / Export / Deploiement
 
@@ -406,11 +453,7 @@ Le moteur de pack `.sfpack` est deja present en interne:
 - asset de preview optionnel
 - prompt config optionnelle
 
-Les commandes publiques d’orchestration associées sont prevues:
-
-- `Export-ShellForgeTheme`
-- `Import-ShellForgeTheme`
-- `Deploy-ShellForgeTheme`
+Le moteur interne de pack `.sfpack` est deja present. Les commandes publiques d'orchestration seront exposees ensuite.
 
 ## Tests
 

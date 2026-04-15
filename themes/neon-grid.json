@@ -1,0 +1,80 @@
+{
+  "schemaVersion": "1.0",
+  "name": "Neon Grid",
+  "slug": "neon-grid",
+  "description": "Electric graphite prompt with cyan and magenta accents for dense dev workflows.",
+  "intent": "High-signal developer prompt built for fast scanning of path, git and command-state information.",
+  "promptLayout": {
+    "type": "Grid",
+    "density": "High",
+    "lineMode": "SingleLine",
+    "separatorStyle": "Dense",
+    "promptSymbol": "::",
+    "adminWarningStyle": "Inline"
+  },
+  "palette": {
+    "background": "#111319",
+    "surface": "#1D232E",
+    "accent": "#19F0FF",
+    "accentSecondary": "#FF4FD8",
+    "text": "#EAF9FF",
+    "muted": "#8295AD",
+    "success": "#59F7B2",
+    "warning": "#FFC857",
+    "error": "#FF5A7D",
+    "info": "#84EFFF"
+  },
+  "segments": {
+    "gitEnabled": true,
+    "adminEnabled": true,
+    "statusEnabled": true,
+    "runtimeEnabled": true,
+    "executionTimeEnabled": true,
+    "batteryEnabled": false,
+    "timeEnabled": true,
+    "hostEnabled": false,
+    "userEnabled": false,
+    "pathMode": "Short"
+  },
+  "iconDensity": "High",
+  "psReadLine": {
+    "editMode": "Windows",
+    "predictionColor": "#8295AD",
+    "continuationPrompt": "#8295AD",
+    "colors": {
+      "Command": "#19F0FF",
+      "Comment": "#8295AD",
+      "Keyword": "#FF4FD8",
+      "String": "#DFFAFE",
+      "Number": "#FDE68A",
+      "Operator": "#EAF9FF",
+      "Variable": "#A7F3D0",
+      "Member": "#E9D5FF",
+      "Parameter": "#19F0FF",
+      "Type": "#93C5FD",
+      "Selection": "#1D232E",
+      "InlinePrediction": "#8295AD",
+      "Error": "#FF5A7D"
+    }
+  },
+  "terminal": {
+    "backgroundHex": "#111319",
+    "opacityPercent": 88,
+    "cursorStyle": "Underline",
+    "fontRecommendation": "MesloLGM Nerd Font"
+  },
+  "compatibility": {
+    "nativePromptSupported": true,
+    "ohMyPoshProfileAvailable": true,
+    "minimumPowerShell": "5.1",
+    "notes": [
+      "Designed for modern code-heavy terminals with a dense information layout.",
+      "Neon accents stay readable without looking cartoonish."
+    ]
+  },
+  "preview": {
+    "sampleCommand": "npm run test",
+    "promptExample": "Neon Grid { fast dev lane }"
+  }
+}
+

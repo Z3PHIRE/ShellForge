@@ -5,7 +5,7 @@ function Use-ShellForgeTheme {
     .SYNOPSIS
     Applies a ShellForge theme to the current interactive session without changing the user profile.
     #>
-    [CmdletBinding(SupportsShouldProcess = $true, DefaultParameterSetName = 'Name')]
+    [CmdletBinding(SupportsShouldProcess = $true, DefaultParameterSetName = 'Interactive')]
     param(
         [Parameter(ParameterSetName = 'Name', Mandatory)]
         [ValidateNotNullOrEmpty()]
@@ -17,7 +17,10 @@ function Use-ShellForgeTheme {
 
         [Parameter(ParameterSetName = 'Theme', Mandatory, ValueFromPipeline)]
         [AllowNull()]
-        [object]$Theme
+        [object]$Theme,
+
+        [Parameter(ParameterSetName = 'Interactive')]
+        [switch]$Interactive
     )
 
     process {
@@ -25,6 +28,14 @@ function Use-ShellForgeTheme {
             'Name' { Resolve-ShellForgeTheme -Name $Name }
             'Path' { Resolve-ShellForgeTheme -Path $Path }
             'Theme' { Resolve-ShellForgeTheme -Theme $Theme }
+            'Interactive' {
+                $selectedTheme = Select-ShellForgeTheme -Title 'SHELLFORGE' -Subtitle 'Apply a theme to the current session'
+                if ($null -eq $selectedTheme) {
+                    return $null
+                }
+
+                Resolve-ShellForgeTheme -Path $selectedTheme.SourcePath
+            }
         }
 
         if ($PSCmdlet.ShouldProcess($resolvedTheme.Theme.name, 'Apply ShellForge theme to current session')) {
@@ -36,4 +47,3 @@ function Use-ShellForgeTheme {
         }
     }
 }
-

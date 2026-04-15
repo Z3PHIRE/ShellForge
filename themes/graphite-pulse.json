@@ -1,0 +1,80 @@
+{
+  "schemaVersion": "1.0",
+  "name": "Graphite Pulse",
+  "slug": "graphite-pulse",
+  "description": "Graphite practical prompt with teal focus and path-heavy ergonomics.",
+  "intent": "Compact daily shell centered on path visibility and practical signal over ornament.",
+  "promptLayout": {
+    "type": "PathHeavy",
+    "density": "Medium",
+    "lineMode": "SingleLine",
+    "separatorStyle": "PathFirst",
+    "promptSymbol": ">>",
+    "adminWarningStyle": "Subtle"
+  },
+  "palette": {
+    "background": "#161B1F",
+    "surface": "#242C31",
+    "accent": "#43B3AE",
+    "accentSecondary": "#C0CCD2",
+    "text": "#F0F4F6",
+    "muted": "#95A5AD",
+    "success": "#6CD3B8",
+    "warning": "#F0B15A",
+    "error": "#FF7A7A",
+    "info": "#6CCCD1"
+  },
+  "segments": {
+    "gitEnabled": true,
+    "adminEnabled": false,
+    "statusEnabled": true,
+    "runtimeEnabled": false,
+    "executionTimeEnabled": true,
+    "batteryEnabled": false,
+    "timeEnabled": false,
+    "hostEnabled": false,
+    "userEnabled": false,
+    "pathMode": "Full"
+  },
+  "iconDensity": "Low",
+  "psReadLine": {
+    "editMode": "Windows",
+    "predictionColor": "#95A5AD",
+    "continuationPrompt": "#95A5AD",
+    "colors": {
+      "Command": "#43B3AE",
+      "Comment": "#95A5AD",
+      "Keyword": "#C0CCD2",
+      "String": "#F0F4F6",
+      "Number": "#F0B15A",
+      "Operator": "#F0F4F6",
+      "Variable": "#6CCCD1",
+      "Member": "#C0CCD2",
+      "Parameter": "#43B3AE",
+      "Type": "#F0B15A",
+      "Selection": "#242C31",
+      "InlinePrediction": "#95A5AD",
+      "Error": "#FF7A7A"
+    }
+  },
+  "terminal": {
+    "backgroundHex": "#161B1F",
+    "opacityPercent": 95,
+    "cursorStyle": "Line",
+    "fontRecommendation": "JetBrainsMono Nerd Font"
+  },
+  "compatibility": {
+    "nativePromptSupported": true,
+    "ohMyPoshProfileAvailable": true,
+    "minimumPowerShell": "5.1",
+    "notes": [
+      "Ideal for path-heavy repo work and everyday shell routines.",
+      "Prioritizes file-system context over decorative density."
+    ]
+  },
+  "preview": {
+    "sampleCommand": "Get-ChildItem -Force",
+    "promptExample": "Graphite Pulse // practical daily shell"
+  }
+}
+

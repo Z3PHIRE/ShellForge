@@ -1,0 +1,80 @@
+{
+  "schemaVersion": "1.0",
+  "name": "Purple Forge",
+  "slug": "purple-forge",
+  "description": "Boxed dark prompt with purple steel segments and a strong signature look.",
+  "intent": "Rich boxed prompt with a confident visual identity for people who want character without losing clarity.",
+  "promptLayout": {
+    "type": "Boxed",
+    "density": "Medium",
+    "lineMode": "DoubleLine",
+    "separatorStyle": "Boxed",
+    "promptSymbol": "=>",
+    "adminWarningStyle": "Inline"
+  },
+  "palette": {
+    "background": "#0C0B10",
+    "surface": "#201A2C",
+    "accent": "#9A6BFF",
+    "accentSecondary": "#D0A6FF",
+    "text": "#F4EEFF",
+    "muted": "#A69BC0",
+    "success": "#6EF0B7",
+    "warning": "#D9A0FF",
+    "error": "#FF6FA7",
+    "info": "#BBA7FF"
+  },
+  "segments": {
+    "gitEnabled": true,
+    "adminEnabled": true,
+    "statusEnabled": true,
+    "runtimeEnabled": true,
+    "executionTimeEnabled": true,
+    "batteryEnabled": false,
+    "timeEnabled": false,
+    "hostEnabled": false,
+    "userEnabled": true,
+    "pathMode": "Short"
+  },
+  "iconDensity": "Medium",
+  "psReadLine": {
+    "editMode": "Windows",
+    "predictionColor": "#A69BC0",
+    "continuationPrompt": "#A69BC0",
+    "colors": {
+      "Command": "#9A6BFF",
+      "Comment": "#A69BC0",
+      "Keyword": "#D0A6FF",
+      "String": "#F4EEFF",
+      "Number": "#D9A0FF",
+      "Operator": "#F4EEFF",
+      "Variable": "#BBA7FF",
+      "Member": "#D0A6FF",
+      "Parameter": "#9A6BFF",
+      "Type": "#D9A0FF",
+      "Selection": "#201A2C",
+      "InlinePrediction": "#A69BC0",
+      "Error": "#FF6FA7"
+    }
+  },
+  "terminal": {
+    "backgroundHex": "#0C0B10",
+    "opacityPercent": 89,
+    "cursorStyle": "Underline",
+    "fontRecommendation": "MesloLGM Nerd Font"
+  },
+  "compatibility": {
+    "nativePromptSupported": true,
+    "ohMyPoshProfileAvailable": true,
+    "minimumPowerShell": "5.1",
+    "notes": [
+      "Strong visual signature without sacrificing prompt readability.",
+      "Looks best with boxed glyph-friendly fonts."
+    ]
+  },
+  "preview": {
+    "sampleCommand": "Get-ChildItem Env:",
+    "promptExample": "Purple Forge | shape the shell"
+  }
+}
+

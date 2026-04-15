@@ -18,6 +18,5 @@ function Read-ShellForgeJsonFile {
         throw "JSON file is empty: $resolvedPath"
     }
 
-    return $rawContent | ConvertFrom-Json -Depth 100
+    return $rawContent | ConvertFrom-Json
 }
-

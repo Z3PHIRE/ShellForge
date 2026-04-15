@@ -1,0 +1,80 @@
+{
+  "schemaVersion": "1.0",
+  "name": "CyberGlass",
+  "slug": "cyberglass",
+  "description": "Deep navy glass prompt with cyan and violet highlights.",
+  "intent": "Premium cyber prompt with segmented glass panels and balanced engineering density.",
+  "promptLayout": {
+    "type": "Glass",
+    "density": "Medium",
+    "lineMode": "DoubleLine",
+    "separatorStyle": "Sharp",
+    "promptSymbol": ">>",
+    "adminWarningStyle": "Inline"
+  },
+  "palette": {
+    "background": "#081421",
+    "surface": "#112033",
+    "accent": "#4DD0E1",
+    "accentSecondary": "#8875FF",
+    "text": "#E8F7FF",
+    "muted": "#7B9BB7",
+    "success": "#2EE6A6",
+    "warning": "#F4B95D",
+    "error": "#FF5D7A",
+    "info": "#7FD8FF"
+  },
+  "segments": {
+    "gitEnabled": true,
+    "adminEnabled": true,
+    "statusEnabled": true,
+    "runtimeEnabled": true,
+    "executionTimeEnabled": true,
+    "batteryEnabled": false,
+    "timeEnabled": true,
+    "hostEnabled": false,
+    "userEnabled": false,
+    "pathMode": "Short"
+  },
+  "iconDensity": "Medium",
+  "psReadLine": {
+    "editMode": "Windows",
+    "predictionColor": "#7B9BB7",
+    "continuationPrompt": "#7B9BB7",
+    "colors": {
+      "Command": "#4DD0E1",
+      "Comment": "#7B9BB7",
+      "Keyword": "#8875FF",
+      "String": "#E8F7FF",
+      "Number": "#F4B95D",
+      "Operator": "#E8F7FF",
+      "Variable": "#7FD8FF",
+      "Member": "#8875FF",
+      "Parameter": "#4DD0E1",
+      "Type": "#F4B95D",
+      "Selection": "#112033",
+      "InlinePrediction": "#7B9BB7",
+      "Error": "#FF5D7A"
+    }
+  },
+  "terminal": {
+    "backgroundHex": "#081421",
+    "opacityPercent": 86,
+    "cursorStyle": "Line",
+    "fontRecommendation": "CaskaydiaCove Nerd Font"
+  },
+  "compatibility": {
+    "nativePromptSupported": true,
+    "ohMyPoshProfileAvailable": true,
+    "minimumPowerShell": "5.1",
+    "notes": [
+      "Best with translucent terminals and a Nerd Font.",
+      "Balanced for daily engineering and Git-heavy work."
+    ]
+  },
+  "preview": {
+    "sampleCommand": "git status",
+    "promptExample": "CyberGlass :: secure session"
+  }
+}
+

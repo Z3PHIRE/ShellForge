@@ -5,7 +5,7 @@ function Test-ShellForgeTheme {
     .SYNOPSIS
     Validates a ShellForge theme object or theme file.
     #>
-    [CmdletBinding(DefaultParameterSetName = 'Path')]
+    [CmdletBinding(DefaultParameterSetName = 'All')]
     param(
         [Parameter(ParameterSetName = 'Path', Mandatory)]
         [ValidateNotNullOrEmpty()]
@@ -13,10 +13,38 @@ function Test-ShellForgeTheme {
 
         [Parameter(ParameterSetName = 'Theme', Mandatory, ValueFromPipeline)]
         [AllowNull()]
-        [object]$Theme
+        [object]$Theme,
+
+        [Parameter(ParameterSetName = 'All')]
+        [switch]$All
     )
 
     process {
+        if ($PSCmdlet.ParameterSetName -eq 'All') {
+            $validationResults = [System.Collections.Generic.List[object]]::new()
+            foreach ($availableTheme in @(Get-ShellForgeTheme)) {
+                try {
+                    $resolvedTheme = Resolve-ShellForgeTheme -Path $availableTheme.SourcePath
+                    [void]$validationResults.Add([pscustomobject]@{
+                        IsValid   = $true
+                        ThemeName = $resolvedTheme.Theme.name
+                        Errors    = @()
+                        Theme     = $resolvedTheme.Theme
+                    })
+                }
+                catch {
+                    [void]$validationResults.Add([pscustomobject]@{
+                        IsValid   = $false
+                        ThemeName = [string]$availableTheme.Name
+                        Errors    = @($_.Exception.Message)
+                        Theme     = $null
+                    })
+                }
+            }
+
+            return @($validationResults)
+        }
+
         try {
             $resolvedTheme = if ($PSCmdlet.ParameterSetName -eq 'Path') {
                 Resolve-ShellForgeTheme -Path $Path
@@ -42,4 +70,3 @@ function Test-ShellForgeTheme {
         }
     }
 }
-

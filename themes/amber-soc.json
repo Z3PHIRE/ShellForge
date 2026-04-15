@@ -1,0 +1,79 @@
+{
+  "schemaVersion": "1.0",
+  "name": "Amber SOC",
+  "slug": "amber-soc",
+  "description": "Dark amber operations prompt with visible warning and state segments.",
+  "intent": "Operations and monitoring layout that keeps warnings, timing and machine context impossible to miss.",
+  "promptLayout": {
+    "type": "SOC",
+    "density": "Medium",
+    "lineMode": "DoubleLine",
+    "separatorStyle": "Operational",
+    "promptSymbol": ">>",
+    "adminWarningStyle": "Banner"
+  },
+  "palette": {
+    "background": "#0F0F0F",
+    "surface": "#1C1C1C",
+    "accent": "#FFB347",
+    "accentSecondary": "#FF8C42",
+    "text": "#FFF3E0",
+    "muted": "#AA977F",
+    "success": "#FFCF6B",
+    "warning": "#FF9F1C",
+    "error": "#FF6B50",
+    "info": "#FFD38A"
+  },
+  "segments": {
+    "gitEnabled": true,
+    "adminEnabled": true,
+    "statusEnabled": true,
+    "runtimeEnabled": true,
+    "executionTimeEnabled": true,
+    "batteryEnabled": false,
+    "timeEnabled": true,
+    "hostEnabled": true,
+    "userEnabled": true,
+    "pathMode": "Short"
+  },
+  "iconDensity": "Medium",
+  "psReadLine": {
+    "editMode": "Windows",
+    "predictionColor": "#AA977F",
+    "continuationPrompt": "#AA977F",
+    "colors": {
+      "Command": "#FFB347",
+      "Comment": "#AA977F",
+      "Keyword": "#FF8C42",
+      "String": "#FFF3E0",
+      "Number": "#FF9F1C",
+      "Operator": "#FFF3E0",
+      "Variable": "#FFD38A",
+      "Member": "#FF8C42",
+      "Parameter": "#FFB347",
+      "Type": "#FF9F1C",
+      "Selection": "#1C1C1C",
+      "InlinePrediction": "#AA977F",
+      "Error": "#FF6B50"
+    }
+  },
+  "terminal": {
+    "backgroundHex": "#0F0F0F",
+    "opacityPercent": 96,
+    "cursorStyle": "Block",
+    "fontRecommendation": "CaskaydiaCove Nerd Font"
+  },
+  "compatibility": {
+    "nativePromptSupported": true,
+    "ohMyPoshProfileAvailable": true,
+    "minimumPowerShell": "5.1",
+    "notes": [
+      "Designed for SOC, monitoring and response-oriented shell usage.",
+      "Pairs well with terminals that do not use transparency."
+    ]
+  },
+  "preview": {
+    "sampleCommand": "Get-EventLog -LogName System -Newest 5",
+    "promptExample": "Amber SOC || watch the signal"
+  }
+}

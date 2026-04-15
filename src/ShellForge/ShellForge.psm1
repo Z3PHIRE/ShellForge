@@ -21,17 +21,12 @@ Set-Alias -Name shellforge -Value Invoke-ShellForge -Scope Global
 
 Export-ModuleMember -Function @(
     'Backup-ShellForgeConfig',
-    'Deploy-ShellForgeTheme',
-    'Export-ShellForgeTheme',
     'Get-ShellForgeTheme',
     'Import-ShellForgeProfile',
-    'Import-ShellForgeTheme',
     'Install-ShellForgeTheme',
     'Invoke-ShellForge',
     'New-ShellForgeTheme',
     'Restore-ShellForgeConfig',
     'Test-ShellForgeTheme',
-    'Uninstall-ShellForge',
     'Use-ShellForgeTheme'
 ) -Alias @('shellforge')
-

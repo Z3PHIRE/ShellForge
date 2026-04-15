@@ -55,8 +55,8 @@ function Read-ShellForgePack {
 
         return [pscustomobject]@{
             PackPath            = $resolvedPackPath
-            Manifest            = ($manifestContent | ConvertFrom-Json -Depth 100)
-            Theme               = (ConvertTo-ShellForgeThemeObject -InputObject ($themeContent | ConvertFrom-Json -Depth 100))
+            Manifest            = ($manifestContent | ConvertFrom-Json)
+            Theme               = (ConvertTo-ShellForgeThemeObject -InputObject ($themeContent | ConvertFrom-Json))
             PreviewContent      = $previewContent
             PromptConfigContent = $promptConfigContent
         }
@@ -66,4 +66,3 @@ function Read-ShellForgePack {
         $fileStream.Dispose()
     }
 }
-

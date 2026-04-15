@@ -1,0 +1,80 @@
+{
+  "schemaVersion": "1.0",
+  "name": "Arctic Void",
+  "slug": "arctic-void",
+  "description": "Cold dark blue prompt with frost white spacing and minimal noise.",
+  "intent": "Calm and highly readable shell for people who want clean focus over visual pressure.",
+  "promptLayout": {
+    "type": "Minimal",
+    "density": "Low",
+    "lineMode": "SingleLine",
+    "separatorStyle": "Clean",
+    "promptSymbol": ">",
+    "adminWarningStyle": "Subtle"
+  },
+  "palette": {
+    "background": "#0B1420",
+    "surface": "#132132",
+    "accent": "#A9D9FF",
+    "accentSecondary": "#7DB7FF",
+    "text": "#F3F8FC",
+    "muted": "#96AEC8",
+    "success": "#7BDCB5",
+    "warning": "#E8C36A",
+    "error": "#FF7A8A",
+    "info": "#BDE7FF"
+  },
+  "segments": {
+    "gitEnabled": true,
+    "adminEnabled": false,
+    "statusEnabled": true,
+    "runtimeEnabled": false,
+    "executionTimeEnabled": false,
+    "batteryEnabled": false,
+    "timeEnabled": true,
+    "hostEnabled": false,
+    "userEnabled": false,
+    "pathMode": "Full"
+  },
+  "iconDensity": "Low",
+  "psReadLine": {
+    "editMode": "Windows",
+    "predictionColor": "#96AEC8",
+    "continuationPrompt": "#96AEC8",
+    "colors": {
+      "Command": "#A9D9FF",
+      "Comment": "#96AEC8",
+      "Keyword": "#7DB7FF",
+      "String": "#F3F8FC",
+      "Number": "#E8C36A",
+      "Operator": "#F3F8FC",
+      "Variable": "#BDE7FF",
+      "Member": "#7DB7FF",
+      "Parameter": "#A9D9FF",
+      "Type": "#E8C36A",
+      "Selection": "#132132",
+      "InlinePrediction": "#96AEC8",
+      "Error": "#FF7A8A"
+    }
+  },
+  "terminal": {
+    "backgroundHex": "#0B1420",
+    "opacityPercent": 92,
+    "cursorStyle": "Line",
+    "fontRecommendation": "JetBrainsMono Nerd Font"
+  },
+  "compatibility": {
+    "nativePromptSupported": true,
+    "ohMyPoshProfileAvailable": true,
+    "minimumPowerShell": "5.1",
+    "notes": [
+      "Optimized for readability in long shell sessions.",
+      "Works well on non-transparent terminals."
+    ]
+  },
+  "preview": {
+    "sampleCommand": "Get-Command",
+    "promptExample": "Arctic Void > clear focus"
+  }
+}
+

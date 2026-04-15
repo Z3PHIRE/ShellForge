@@ -10,17 +10,13 @@
     CompatiblePSEditions = @('Desktop', 'Core')
     FunctionsToExport = @(
         'Backup-ShellForgeConfig',
-        'Deploy-ShellForgeTheme',
-        'Export-ShellForgeTheme',
         'Get-ShellForgeTheme',
         'Import-ShellForgeProfile',
-        'Import-ShellForgeTheme',
         'Install-ShellForgeTheme',
         'Invoke-ShellForge',
         'New-ShellForgeTheme',
         'Restore-ShellForgeConfig',
         'Test-ShellForgeTheme',
-        'Uninstall-ShellForge',
         'Use-ShellForgeTheme'
     )
     AliasesToExport   = @('shellforge')
@@ -29,7 +25,7 @@
             Tags         = @('powershell', 'theme', 'prompt', 'terminal', 'deployment', 'psreadline', 'shellforge')
             ProjectUri   = 'https://github.com/Z3PHIRE/ShellForge'
             LicenseUri   = 'https://github.com/Z3PHIRE/ShellForge/blob/main/LICENSE'
-            ReleaseNotes = 'Initial production release with presets, custom builder, import/export and deployment.'
+            ReleaseNotes = 'Initial production release with built-in presets, custom builder, interactive menu and safe profile integration.'
         }
     }
 }

@@ -14,14 +14,14 @@ function Get-ShellForgeBundledResourcePath {
     switch ($ResourceType) {
         'Themes' {
             $candidatePaths = @(
-                Join-Path -Path $moduleContentPath -ChildPath 'Themes',
-                Join-Path -Path $repoRoot -ChildPath 'themes'
+                (Join-Path -Path $moduleContentPath -ChildPath 'Themes')
+                (Join-Path -Path $repoRoot -ChildPath 'themes')
             )
         }
         'Previews' {
             $candidatePaths = @(
-                Join-Path -Path $moduleContentPath -ChildPath 'Previews',
-                Join-Path -Path $repoRoot -ChildPath 'assets\previews'
+                (Join-Path -Path $moduleContentPath -ChildPath 'Previews')
+                (Join-Path -Path $repoRoot -ChildPath 'assets\previews')
             )
         }
         default {
@@ -37,4 +37,3 @@ function Get-ShellForgeBundledResourcePath {
 
     throw "ShellForge resource path for '$ResourceType' could not be located."
 }
-

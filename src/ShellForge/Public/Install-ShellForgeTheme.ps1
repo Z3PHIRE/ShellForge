@@ -5,7 +5,7 @@ function Install-ShellForgeTheme {
     .SYNOPSIS
     Installs a ShellForge theme locally, updates the user profile and writes a recoverable configuration.
     #>
-    [CmdletBinding(SupportsShouldProcess = $true, DefaultParameterSetName = 'Name')]
+    [CmdletBinding(SupportsShouldProcess = $true, DefaultParameterSetName = 'Interactive')]
     param(
         [Parameter(ParameterSetName = 'Name', Mandatory)]
         [ValidateNotNullOrEmpty()]
@@ -18,6 +18,9 @@ function Install-ShellForgeTheme {
         [Parameter(ParameterSetName = 'Theme', Mandatory, ValueFromPipeline)]
         [AllowNull()]
         [object]$Theme,
+
+        [Parameter(ParameterSetName = 'Interactive')]
+        [switch]$Interactive,
 
         [Parameter()]
         [string]$ProfilePath = $PROFILE.CurrentUserAllHosts,
@@ -35,6 +38,14 @@ function Install-ShellForgeTheme {
             'Name' { Resolve-ShellForgeTheme -Name $Name }
             'Path' { Resolve-ShellForgeTheme -Path $Path }
             'Theme' { Resolve-ShellForgeTheme -Theme $Theme }
+            'Interactive' {
+                $selectedTheme = Select-ShellForgeTheme -Title 'SHELLFORGE' -Subtitle 'Install a theme into your profile'
+                if ($null -eq $selectedTheme) {
+                    return $null
+                }
+
+                Resolve-ShellForgeTheme -Path $selectedTheme.SourcePath
+            }
         }
 
         if ($PSCmdlet.ShouldProcess($resolvedTheme.Theme.name, 'Install ShellForge theme locally')) {

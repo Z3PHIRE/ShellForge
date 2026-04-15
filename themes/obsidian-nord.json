@@ -1,0 +1,80 @@
+{
+  "schemaVersion": "1.0",
+  "name": "Obsidian Nord",
+  "slug": "obsidian-nord",
+  "description": "Muted nord slate prompt with calm git emphasis and low visual noise.",
+  "intent": "Git-first engineering prompt for people who want a composed shell that stays out of the way.",
+  "promptLayout": {
+    "type": "Nordic",
+    "density": "Low",
+    "lineMode": "SingleLine",
+    "separatorStyle": "Calm",
+    "promptSymbol": ">",
+    "adminWarningStyle": "Subtle"
+  },
+  "palette": {
+    "background": "#1B2330",
+    "surface": "#253142",
+    "accent": "#81A1C1",
+    "accentSecondary": "#88C0D0",
+    "text": "#E5EDF5",
+    "muted": "#94A7BA",
+    "success": "#A3D5A8",
+    "warning": "#EBCB8B",
+    "error": "#BF616A",
+    "info": "#8FBCBB"
+  },
+  "segments": {
+    "gitEnabled": true,
+    "adminEnabled": false,
+    "statusEnabled": true,
+    "runtimeEnabled": true,
+    "executionTimeEnabled": false,
+    "batteryEnabled": false,
+    "timeEnabled": false,
+    "hostEnabled": false,
+    "userEnabled": false,
+    "pathMode": "Short"
+  },
+  "iconDensity": "Low",
+  "psReadLine": {
+    "editMode": "Windows",
+    "predictionColor": "#94A7BA",
+    "continuationPrompt": "#94A7BA",
+    "colors": {
+      "Command": "#81A1C1",
+      "Comment": "#94A7BA",
+      "Keyword": "#88C0D0",
+      "String": "#DCECF4",
+      "Number": "#EBCB8B",
+      "Operator": "#E5EDF5",
+      "Variable": "#81A1C1",
+      "Member": "#8FBCBB",
+      "Parameter": "#88C0D0",
+      "Type": "#81A1C1",
+      "Selection": "#253142",
+      "InlinePrediction": "#94A7BA",
+      "Error": "#BF616A"
+    }
+  },
+  "terminal": {
+    "backgroundHex": "#1B2330",
+    "opacityPercent": 93,
+    "cursorStyle": "Line",
+    "fontRecommendation": "JetBrainsMono Nerd Font"
+  },
+  "compatibility": {
+    "nativePromptSupported": true,
+    "ohMyPoshProfileAvailable": true,
+    "minimumPowerShell": "5.1",
+    "notes": [
+      "Quiet nord-inspired look for long engineering sessions.",
+      "Good fit for Git-heavy repositories and low-distraction setups."
+    ]
+  },
+  "preview": {
+    "sampleCommand": "git log --oneline -5",
+    "promptExample": "Obsidian Nord -> calm engineering"
+  }
+}
+
