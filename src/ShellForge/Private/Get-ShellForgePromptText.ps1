@@ -60,6 +60,10 @@ function Get-ShellForgeAnsiText {
         [string]$HexColor
     )
 
+    if (-not (Test-ShellForgeHexColor -Value $HexColor)) {
+        return $Text
+    }
+
     if ($null -ne (Get-Variable -Name PSStyle -Scope Global -ErrorAction SilentlyContinue)) {
         return "$($PSStyle.Foreground.FromRgb($HexColor))$Text$($PSStyle.Reset)"
     }
@@ -202,15 +206,26 @@ function Get-ShellForgeBatteryState {
         return $null
     }
 
+    $currentTime = [DateTime]::UtcNow
+    if (($null -ne $script:ShellForgeBatteryCache) -and (($currentTime - $script:ShellForgeBatteryCacheTime).TotalSeconds -lt 30)) {
+        return $script:ShellForgeBatteryCache
+    }
+
     try {
         $battery = Get-CimInstance -ClassName Win32_Battery -ErrorAction Stop | Select-Object -First 1
         if ($null -eq $battery) {
+            $script:ShellForgeBatteryCache = $null
+            $script:ShellForgeBatteryCacheTime = $currentTime
             return $null
         }
 
-        return '{0}%%' -f [int]$battery.EstimatedChargeRemaining
+        $script:ShellForgeBatteryCache = ('{0}%%' -f [int]$battery.EstimatedChargeRemaining)
+        $script:ShellForgeBatteryCacheTime = $currentTime
+        return $script:ShellForgeBatteryCache
     }
     catch {
+        $script:ShellForgeBatteryCache = $null
+        $script:ShellForgeBatteryCacheTime = $currentTime
         return $null
     }
 }
@@ -419,133 +434,145 @@ function Get-ShellForgePromptText {
     [CmdletBinding()]
     param()
 
-    if ($null -eq $script:ShellForgeCurrentTheme) {
-        return 'PS> '
-    }
-
-    $theme = $script:ShellForgeCurrentTheme
-    $tokens = Get-ShellForgeLayoutTokens -Theme $theme
-    $segmentValues = [System.Collections.Generic.List[object]]::new()
-
-    $lastSuccess = $?
-    $lastExitCode = $null
-    $lastExitCodeVariable = Get-Variable -Name LASTEXITCODE -Scope Global -ErrorAction SilentlyContinue
-    if ($null -ne $lastExitCodeVariable) {
-        $lastExitCode = $lastExitCodeVariable.Value
-    }
-    if ($theme.segments.statusEnabled) {
-        $statusText = if ($lastSuccess -and ($lastExitCode -eq 0 -or $null -eq $lastExitCode)) { 'OK' } else { 'ERR {0}' -f $lastExitCode }
-        [void]$segmentValues.Add([pscustomobject]@{
-            Name     = 'status'
-            Group    = Get-ShellForgePromptGroup -SegmentName 'status'
-            Rendered = (Format-ShellForgeSegment -Text $statusText -SegmentName 'status' -Theme $theme -Tokens $tokens)
-        })
-    }
-
-    if ($theme.segments.adminEnabled -and (Test-ShellForgeAdministrator)) {
-        $adminText = switch ($theme.promptLayout.adminWarningStyle) {
-            'Banner' { 'ADMIN MODE' }
-            'Inline' { 'ADMIN' }
-            default { 'ELEVATED' }
+    try {
+        if ($null -eq $script:ShellForgeCurrentTheme) {
+            return 'PS> '
         }
 
-        [void]$segmentValues.Add([pscustomobject]@{
-            Name     = 'admin'
-            Group    = Get-ShellForgePromptGroup -SegmentName 'admin'
-            Rendered = (Format-ShellForgeSegment -Text $adminText -SegmentName 'admin' -Theme $theme -Tokens $tokens)
-        })
-    }
+        $theme = $script:ShellForgeCurrentTheme
+        $tokens = Get-ShellForgeLayoutTokens -Theme $theme
+        $segmentValues = [System.Collections.Generic.List[object]]::new()
 
-    if ($theme.segments.userEnabled) {
-        [void]$segmentValues.Add([pscustomobject]@{
-            Name     = 'user'
-            Group    = Get-ShellForgePromptGroup -SegmentName 'user'
-            Rendered = (Format-ShellForgeSegment -Text ([Environment]::UserName) -SegmentName 'user' -Theme $theme -Tokens $tokens)
-        })
-    }
+        $lastSuccess = $?
+        $lastExitCode = $null
+        $lastExitCodeVariable = Get-Variable -Name LASTEXITCODE -Scope Global -ErrorAction SilentlyContinue
+        if ($null -ne $lastExitCodeVariable) {
+            $lastExitCode = $lastExitCodeVariable.Value
+        }
 
-    if ($theme.segments.hostEnabled) {
-        [void]$segmentValues.Add([pscustomobject]@{
-            Name     = 'host'
-            Group    = Get-ShellForgePromptGroup -SegmentName 'host'
-            Rendered = (Format-ShellForgeSegment -Text ([Environment]::MachineName) -SegmentName 'host' -Theme $theme -Tokens $tokens)
-        })
-    }
-
-    $currentPath = Get-ShellForgeCompactPath -PathValue (Get-Location).Path -Mode $theme.segments.pathMode
-    [void]$segmentValues.Add([pscustomobject]@{
-        Name     = 'path'
-        Group    = Get-ShellForgePromptGroup -SegmentName 'path'
-        Rendered = (Format-ShellForgeSegment -Text $currentPath -SegmentName 'path' -Theme $theme -Tokens $tokens)
-    })
-
-    if ($theme.segments.gitEnabled) {
-        $gitState = Get-ShellForgeGitState
-        if ($null -ne $gitState) {
-            $gitText = if ($gitState.Dirty) { '{0}*' -f $gitState.Branch } else { $gitState.Branch }
+        if ($theme.segments.statusEnabled) {
+            $statusText = if ($lastSuccess -and ($lastExitCode -eq 0 -or $null -eq $lastExitCode)) { 'OK' } else { 'ERR {0}' -f $lastExitCode }
             [void]$segmentValues.Add([pscustomobject]@{
-                Name     = 'git'
-                Group    = Get-ShellForgePromptGroup -SegmentName 'git'
-                Rendered = (Format-ShellForgeSegment -Text $gitText -SegmentName 'git' -Theme $theme -Tokens $tokens)
+                Name     = 'status'
+                Group    = Get-ShellForgePromptGroup -SegmentName 'status'
+                Rendered = (Format-ShellForgeSegment -Text $statusText -SegmentName 'status' -Theme $theme -Tokens $tokens)
             })
         }
-    }
 
-    if ($theme.segments.runtimeEnabled) {
-        [void]$segmentValues.Add([pscustomobject]@{
-            Name     = 'runtime'
-            Group    = Get-ShellForgePromptGroup -SegmentName 'runtime'
-            Rendered = (Format-ShellForgeSegment -Text (Get-ShellForgeRuntimeText) -SegmentName 'runtime' -Theme $theme -Tokens $tokens)
-        })
-    }
+        if ($theme.segments.adminEnabled -and (Test-ShellForgeAdministrator)) {
+            $adminText = switch ($theme.promptLayout.adminWarningStyle) {
+                'Banner' { 'ADMIN MODE' }
+                'Inline' { 'ADMIN' }
+                default { 'ELEVATED' }
+            }
 
-    if ($theme.segments.executionTimeEnabled) {
-        $executionTime = Get-ShellForgeExecutionTime
-        if ($null -ne $executionTime) {
             [void]$segmentValues.Add([pscustomobject]@{
-                Name     = 'exec'
-                Group    = Get-ShellForgePromptGroup -SegmentName 'exec'
-                Rendered = (Format-ShellForgeSegment -Text $executionTime -SegmentName 'exec' -Theme $theme -Tokens $tokens)
+                Name     = 'admin'
+                Group    = Get-ShellForgePromptGroup -SegmentName 'admin'
+                Rendered = (Format-ShellForgeSegment -Text $adminText -SegmentName 'admin' -Theme $theme -Tokens $tokens)
             })
         }
-    }
 
-    if ($theme.segments.timeEnabled) {
-        [void]$segmentValues.Add([pscustomobject]@{
-            Name     = 'time'
-            Group    = Get-ShellForgePromptGroup -SegmentName 'time'
-            Rendered = (Format-ShellForgeSegment -Text ([DateTime]::Now.ToString('HH:mm')) -SegmentName 'time' -Theme $theme -Tokens $tokens)
-        })
-    }
-
-    if ($theme.segments.batteryEnabled) {
-        $batteryState = Get-ShellForgeBatteryState
-        if ($null -ne $batteryState) {
+        if ($theme.segments.userEnabled) {
             [void]$segmentValues.Add([pscustomobject]@{
-                Name     = 'battery'
-                Group    = Get-ShellForgePromptGroup -SegmentName 'battery'
-                Rendered = (Format-ShellForgeSegment -Text $batteryState -SegmentName 'battery' -Theme $theme -Tokens $tokens)
+                Name     = 'user'
+                Group    = Get-ShellForgePromptGroup -SegmentName 'user'
+                Rendered = (Format-ShellForgeSegment -Text ([Environment]::UserName) -SegmentName 'user' -Theme $theme -Tokens $tokens)
             })
         }
-    }
 
-    $withinGroupJoiner = if ($theme.promptLayout.density -eq 'High') { $tokens.Divider } elseif ($theme.promptLayout.density -eq 'Low') { ' ' } else { $tokens.Joiner }
-    $betweenGroupJoiner = if ($theme.promptLayout.type -eq 'Minimal') { '   ' } else { '   {0}   ' -f $tokens.Divider.Trim() }
-    $primaryLine = Join-ShellForgePromptSegments -Segments @($segmentValues | Where-Object { $_.Group -eq 'Primary' } | Select-Object -ExpandProperty Rendered) -Joiner $withinGroupJoiner
-    $contextLine = Join-ShellForgePromptSegments -Segments @($segmentValues | Where-Object { $_.Group -eq 'Context' } | Select-Object -ExpandProperty Rendered) -Joiner $withinGroupJoiner
-    $promptSymbol = Get-ShellForgeAnsiText -Text $theme.promptLayout.promptSymbol -HexColor $theme.palette.text
+        if ($theme.segments.hostEnabled) {
+            [void]$segmentValues.Add([pscustomobject]@{
+                Name     = 'host'
+                Group    = Get-ShellForgePromptGroup -SegmentName 'host'
+                Rendered = (Format-ShellForgeSegment -Text ([Environment]::MachineName) -SegmentName 'host' -Theme $theme -Tokens $tokens)
+            })
+        }
 
-    if ($theme.promptLayout.lineMode -eq 'DoubleLine') {
+        $currentPath = Get-ShellForgeCompactPath -PathValue (Get-Location).Path -Mode $theme.segments.pathMode
+        [void]$segmentValues.Add([pscustomobject]@{
+            Name     = 'path'
+            Group    = Get-ShellForgePromptGroup -SegmentName 'path'
+            Rendered = (Format-ShellForgeSegment -Text $currentPath -SegmentName 'path' -Theme $theme -Tokens $tokens)
+        })
+
+        if ($theme.segments.gitEnabled) {
+            $gitState = Get-ShellForgeGitState
+            if ($null -ne $gitState) {
+                $gitText = if ($gitState.Dirty) { '{0}*' -f $gitState.Branch } else { $gitState.Branch }
+                [void]$segmentValues.Add([pscustomobject]@{
+                    Name     = 'git'
+                    Group    = Get-ShellForgePromptGroup -SegmentName 'git'
+                    Rendered = (Format-ShellForgeSegment -Text $gitText -SegmentName 'git' -Theme $theme -Tokens $tokens)
+                })
+            }
+        }
+
+        if ($theme.segments.runtimeEnabled) {
+            [void]$segmentValues.Add([pscustomobject]@{
+                Name     = 'runtime'
+                Group    = Get-ShellForgePromptGroup -SegmentName 'runtime'
+                Rendered = (Format-ShellForgeSegment -Text (Get-ShellForgeRuntimeText) -SegmentName 'runtime' -Theme $theme -Tokens $tokens)
+            })
+        }
+
+        if ($theme.segments.executionTimeEnabled) {
+            $executionTime = Get-ShellForgeExecutionTime
+            if ($null -ne $executionTime) {
+                [void]$segmentValues.Add([pscustomobject]@{
+                    Name     = 'exec'
+                    Group    = Get-ShellForgePromptGroup -SegmentName 'exec'
+                    Rendered = (Format-ShellForgeSegment -Text $executionTime -SegmentName 'exec' -Theme $theme -Tokens $tokens)
+                })
+            }
+        }
+
+        if ($theme.segments.timeEnabled) {
+            [void]$segmentValues.Add([pscustomobject]@{
+                Name     = 'time'
+                Group    = Get-ShellForgePromptGroup -SegmentName 'time'
+                Rendered = (Format-ShellForgeSegment -Text ([DateTime]::Now.ToString('HH:mm')) -SegmentName 'time' -Theme $theme -Tokens $tokens)
+            })
+        }
+
+        if ($theme.segments.batteryEnabled) {
+            $batteryState = Get-ShellForgeBatteryState
+            if ($null -ne $batteryState) {
+                [void]$segmentValues.Add([pscustomobject]@{
+                    Name     = 'battery'
+                    Group    = Get-ShellForgePromptGroup -SegmentName 'battery'
+                    Rendered = (Format-ShellForgeSegment -Text $batteryState -SegmentName 'battery' -Theme $theme -Tokens $tokens)
+                })
+            }
+        }
+
+        $withinGroupJoiner = if ($theme.promptLayout.density -eq 'High') { $tokens.Divider } elseif ($theme.promptLayout.density -eq 'Low') { ' ' } else { $tokens.Joiner }
+        $betweenGroupJoiner = if ($theme.promptLayout.type -eq 'Minimal') { '   ' } else { '   {0}   ' -f $tokens.Divider.Trim() }
+        $primaryLine = Join-ShellForgePromptSegments -Segments @($segmentValues | Where-Object { $_.Group -eq 'Primary' } | Select-Object -ExpandProperty Rendered) -Joiner $withinGroupJoiner
+        $contextLine = Join-ShellForgePromptSegments -Segments @($segmentValues | Where-Object { $_.Group -eq 'Context' } | Select-Object -ExpandProperty Rendered) -Joiner $withinGroupJoiner
+        $promptSymbol = Get-ShellForgeAnsiText -Text $theme.promptLayout.promptSymbol -HexColor $theme.palette.text
+
+        if ($theme.promptLayout.lineMode -eq 'DoubleLine') {
+            if ([string]::IsNullOrWhiteSpace($contextLine)) {
+                return '{0} {1} ' -f $promptSymbol, $primaryLine
+            }
+
+            return '{0}{1}{2} {3} ' -f $contextLine, [Environment]::NewLine, $promptSymbol, $primaryLine
+        }
+
         if ([string]::IsNullOrWhiteSpace($contextLine)) {
             return '{0} {1} ' -f $promptSymbol, $primaryLine
         }
 
-        return '{0}{1}{2} {3} ' -f $contextLine, [Environment]::NewLine, $promptSymbol, $primaryLine
+        return '{0} {1}{2}{3} ' -f $promptSymbol, $primaryLine, $betweenGroupJoiner, $contextLine
     }
+    catch {
+        try {
+            Write-ShellForgeLog -Level 'ERROR' -Operation 'Prompt' -Message $_.Exception.Message
+        }
+        catch {
+        }
 
-    if ([string]::IsNullOrWhiteSpace($contextLine)) {
-        return '{0} {1} ' -f $promptSymbol, $primaryLine
+        return (Get-ShellForgeAnsiText -Text 'SF!> ' -HexColor '#FF5D7A')
     }
-
-    return '{0} {1}{2}{3} ' -f $promptSymbol, $primaryLine, $betweenGroupJoiner, $contextLine
 }

@@ -42,6 +42,68 @@ function New-ShellForgeTheme {
         [string]$PathMode = 'Short',
 
         [Parameter(ParameterSetName = 'Template')]
+        [ValidateSet('Subtle', 'Inline', 'Banner')]
+        [string]$AdminWarningStyle = 'Inline',
+
+        [Parameter(ParameterSetName = 'Template')]
+        [ValidateSet('Palette', 'HighContrast', 'Calm', 'Neon')]
+        [string]$SyntaxProfile = 'Palette',
+
+        [Parameter(ParameterSetName = 'Template')]
+        [ValidateSet('Block', 'Line', 'Underline')]
+        [string]$CursorStyle = 'Line',
+
+        [Parameter(ParameterSetName = 'Template')]
+        [ValidateRange(10, 100)]
+        [int]$OpacityPercent = 90,
+
+        [Parameter(ParameterSetName = 'Template')]
+        [string]$FontRecommendation = 'CaskaydiaCove Nerd Font',
+
+        [Parameter(ParameterSetName = 'Template')]
+        [bool]$GitEnabled = $true,
+
+        [Parameter(ParameterSetName = 'Template')]
+        [bool]$AdminEnabled = $true,
+
+        [Parameter(ParameterSetName = 'Template')]
+        [bool]$StatusEnabled = $true,
+
+        [Parameter(ParameterSetName = 'Template')]
+        [bool]$RuntimeEnabled = $true,
+
+        [Parameter(ParameterSetName = 'Template')]
+        [bool]$ExecutionTimeEnabled = $true,
+
+        [Parameter(ParameterSetName = 'Template')]
+        [bool]$BatteryEnabled = $false,
+
+        [Parameter(ParameterSetName = 'Template')]
+        [bool]$TimeEnabled = $true,
+
+        [Parameter(ParameterSetName = 'Template')]
+        [bool]$HostEnabled = $false,
+
+        [Parameter(ParameterSetName = 'Template')]
+        [bool]$UserEnabled = $false,
+
+        [Parameter(ParameterSetName = 'Template')]
+        [AllowEmptyString()]
+        [string]$BackgroundHex = '',
+
+        [Parameter(ParameterSetName = 'Template')]
+        [AllowEmptyString()]
+        [string]$PredictionColor = '',
+
+        [Parameter(ParameterSetName = 'Template')]
+        [AllowEmptyString()]
+        [string]$SuccessColor = '',
+
+        [Parameter(ParameterSetName = 'Template')]
+        [AllowEmptyString()]
+        [string]$ErrorColor = '',
+
+        [Parameter(ParameterSetName = 'Template')]
         [switch]$Save
     )
 
@@ -49,7 +111,34 @@ function New-ShellForgeTheme {
         return (Invoke-ShellForgeCustomBuilderMenu)
     }
 
-    $theme = New-ShellForgeThemeTemplate -Name $Name -Description $Description -PaletteName $PaletteName -PromptStyle $PromptStyle -Density $Density -LineMode $LineMode -IconDensity $IconDensity -PathMode $PathMode
+    $theme = New-ShellForgeThemeTemplate `
+        -Name $Name `
+        -Description $Description `
+        -PaletteName $PaletteName `
+        -PromptStyle $PromptStyle `
+        -Density $Density `
+        -LineMode $LineMode `
+        -IconDensity $IconDensity `
+        -PathMode $PathMode `
+        -AdminWarningStyle $AdminWarningStyle `
+        -SyntaxProfile $SyntaxProfile `
+        -CursorStyle $CursorStyle `
+        -OpacityPercent $OpacityPercent `
+        -FontRecommendation $FontRecommendation `
+        -GitEnabled $GitEnabled `
+        -AdminEnabled $AdminEnabled `
+        -StatusEnabled $StatusEnabled `
+        -RuntimeEnabled $RuntimeEnabled `
+        -ExecutionTimeEnabled $ExecutionTimeEnabled `
+        -BatteryEnabled $BatteryEnabled `
+        -TimeEnabled $TimeEnabled `
+        -HostEnabled $HostEnabled `
+        -UserEnabled $UserEnabled `
+        -BackgroundHex $BackgroundHex `
+        -PredictionColor $PredictionColor `
+        -SuccessColor $SuccessColor `
+        -ErrorColor $ErrorColor
+
     if ($Save.IsPresent) {
         $savedPath = Join-Path -Path (Get-ShellForgePath -PathType 'Themes' -Ensure) -ChildPath ('{0}.json' -f $theme.slug)
         Write-ShellForgeJsonFile -Path $savedPath -Data $theme -Depth 20

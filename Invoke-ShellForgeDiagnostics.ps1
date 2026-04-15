@@ -273,6 +273,9 @@ function Invoke-DiagnosticInteractiveMenuTest {
 
     $process = [System.Diagnostics.Process]::Start($processStartInfo)
     try {
+        $standardOutputTask = $process.StandardOutput.ReadToEndAsync()
+        $standardErrorTask = $process.StandardError.ReadToEndAsync()
+
         $process.StandardInput.WriteLine('')
         $process.StandardInput.WriteLine('3')
         $process.StandardInput.WriteLine('')
@@ -286,8 +289,8 @@ function Invoke-DiagnosticInteractiveMenuTest {
             $process.WaitForExit()
         }
 
-        $standardOutput = $process.StandardOutput.ReadToEnd()
-        $standardError = $process.StandardError.ReadToEnd()
+        $standardOutput = $standardOutputTask.GetAwaiter().GetResult()
+        $standardError = $standardErrorTask.GetAwaiter().GetResult()
 
         if (-not $timedOut -and $process.ExitCode -ne 0) {
             throw ("Interactive menu test failed with exit code {0}.{1}{2}" -f $process.ExitCode, [Environment]::NewLine, $standardError)
@@ -416,9 +419,7 @@ $tempThemeRestorePath = Join-Path -Path $artifactsRoot -ChildPath 'restore-theme
 
 $initialLocation = (Get-Location).Path
 $initialPrompt = Get-DiagnosticPromptScriptBlock
-$defaultPrompt = Get-DiagnosticDefaultPromptScriptBlock
 $initialPSReadLineState = Get-DiagnosticPSReadLineState
-$moduleWasLoadedBeforeDiagnostic = ($null -ne (Get-Module -Name ShellForge))
 
 $currentThemeSnapshot = $null
 $ohMyPoshSnapshot = $null
@@ -603,7 +604,7 @@ finally {
         Remove-Module -Name ShellForge -Force -ErrorAction SilentlyContinue
     }
 
-    Restore-DiagnosticPrompt -PromptScriptBlock $defaultPrompt
+    Restore-DiagnosticPrompt -PromptScriptBlock $initialPrompt
 
     if (-not $KeepArtifacts.IsPresent -and (Test-Path -LiteralPath $artifactsRoot)) {
         Remove-Item -LiteralPath $artifactsRoot -Recurse -Force -ErrorAction SilentlyContinue
@@ -628,7 +629,7 @@ $summary = [pscustomobject]@{
 }
 
 $summaryJson = $summary | ConvertTo-Json -Depth 10
-Set-Content -LiteralPath $resolvedReportPath -Value $summaryJson -Encoding utf8
+[System.IO.File]::WriteAllText($resolvedReportPath, $summaryJson, [System.Text.UTF8Encoding]::new($false))
 
 Write-Host ''
 Write-Host '============================================================' -ForegroundColor DarkGray

@@ -29,12 +29,20 @@ function Set-ShellForgeProfileBlock {
     }
 
     $loaderPath = Get-ShellForgePath -PathType 'ProfileLoader' -Ensure
-    $loaderArguments = if ($PreferOhMyPosh.IsPresent) { "-ThemePath '$ThemePath' -PreferOhMyPosh" } else { "-ThemePath '$ThemePath'" }
+    $escapedThemePath = $ThemePath.Replace("'", "''")
+    $escapedModuleManifestPath = $ModuleManifestPath.Replace("'", "''")
+    $loaderArguments = if ($PreferOhMyPosh.IsPresent) { "Import-ShellForgeProfile -ThemePath '$escapedThemePath' -PreferOhMyPosh" } else { "Import-ShellForgeProfile -ThemePath '$escapedThemePath'" }
     $loaderContent = @(
-        "Import-Module '$ModuleManifestPath' -ErrorAction Stop"
-        "Import-ShellForgeProfile $loaderArguments"
+        "`$shellForgeModuleManifestPath = '$escapedModuleManifestPath'"
+        "if (Test-Path -LiteralPath `$shellForgeModuleManifestPath) {"
+        "    Import-Module `$shellForgeModuleManifestPath -ErrorAction Stop"
+        '}'
+        'else {'
+        "    Import-Module ShellForge -ErrorAction Stop"
+        '}'
+        $loaderArguments
     ) -join [Environment]::NewLine
-    Set-Content -LiteralPath $loaderPath -Value $loaderContent -Encoding utf8
+    [System.IO.File]::WriteAllText($loaderPath, $loaderContent, [System.Text.UTF8Encoding]::new($false))
 
     $profileContent = Get-Content -LiteralPath $resolvedProfilePath -Raw -Encoding utf8
     $managedBlock = @(
@@ -56,10 +64,9 @@ function Set-ShellForgeProfileBlock {
         $updatedContent = $profileContent.TrimEnd() + [Environment]::NewLine + [Environment]::NewLine + $managedBlock + [Environment]::NewLine
     }
 
-    Set-Content -LiteralPath $resolvedProfilePath -Value $updatedContent -Encoding utf8
+    [System.IO.File]::WriteAllText($resolvedProfilePath, $updatedContent, [System.Text.UTF8Encoding]::new($false))
     return [pscustomobject]@{
         ProfilePath = $resolvedProfilePath
         LoaderPath  = $loaderPath
     }
 }
-

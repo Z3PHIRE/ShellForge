@@ -16,6 +16,9 @@ $script:ShellForgeProfileMarkerStart = '# >>> ShellForge Managed Block >>>'
 $script:ShellForgeProfileMarkerEnd = '# <<< ShellForge Managed Block <<<'
 $script:ShellForgeCurrentTheme = $null
 $script:ShellForgePromptInstalled = $false
+$script:ShellForgePlatformCache = $null
+$script:ShellForgeBatteryCache = $null
+$script:ShellForgeBatteryCacheTime = [DateTime]::MinValue
 
 Set-Alias -Name shellforge -Value Invoke-ShellForge -Scope Global
 

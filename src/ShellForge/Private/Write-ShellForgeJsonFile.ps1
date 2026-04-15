@@ -30,6 +30,39 @@ function Write-ShellForgeJsonFile {
         $Data | ConvertTo-Json -Depth $Depth
     }
 
-    Set-Content -LiteralPath $resolvedPath -Value $json -Encoding utf8
-}
+    $utf8Encoding = [System.Text.UTF8Encoding]::new($false)
+    $temporaryPath = $resolvedPath + '.tmp'
+    $backupPath = $resolvedPath + '.bak'
 
+    try {
+        [System.IO.File]::WriteAllText($temporaryPath, $json, $utf8Encoding)
+
+        if (Test-Path -LiteralPath $resolvedPath) {
+            try {
+                [System.IO.File]::Replace($temporaryPath, $resolvedPath, $backupPath, $true)
+            }
+            catch {
+                Move-Item -LiteralPath $temporaryPath -Destination $resolvedPath -Force
+            }
+        }
+        else {
+            [System.IO.File]::Move($temporaryPath, $resolvedPath)
+        }
+    }
+    catch {
+        if (Test-Path -LiteralPath $temporaryPath) {
+            Remove-Item -LiteralPath $temporaryPath -Force -ErrorAction SilentlyContinue
+        }
+
+        throw
+    }
+    finally {
+        if (Test-Path -LiteralPath $temporaryPath) {
+            Remove-Item -LiteralPath $temporaryPath -Force -ErrorAction SilentlyContinue
+        }
+
+        if (Test-Path -LiteralPath $backupPath) {
+            Remove-Item -LiteralPath $backupPath -Force -ErrorAction SilentlyContinue
+        }
+    }
+}

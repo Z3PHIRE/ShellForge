@@ -4,6 +4,10 @@ function Get-ShellForgePlatformInfo {
     [CmdletBinding()]
     param()
 
+    if ($null -ne $script:ShellForgePlatformCache) {
+        return $script:ShellForgePlatformCache
+    }
+
     $platform = 'Windows'
     $runtimeInformationType = [System.Type]::GetType('System.Runtime.InteropServices.RuntimeInformation, System.Runtime.InteropServices.RuntimeInformation')
     if ($null -ne $runtimeInformationType) {
@@ -21,10 +25,11 @@ function Get-ShellForgePlatformInfo {
         }
     }
 
-    return [pscustomobject]@{
+    $script:ShellForgePlatformCache = [pscustomobject]@{
         Platform  = $platform
         PSEdition = [string]$PSVersionTable.PSEdition
         PSVersion = [string]$PSVersionTable.PSVersion
     }
-}
 
+    return $script:ShellForgePlatformCache
+}
