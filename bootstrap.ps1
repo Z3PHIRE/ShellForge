@@ -1,4 +1,3 @@
-[CmdletBinding(SupportsShouldProcess = $true)]
 param(
     [Parameter()]
     [ValidateNotNullOrEmpty()]
@@ -67,12 +66,34 @@ function Invoke-BootstrapGit {
         throw 'Git is required to install or update ShellForge.'
     }
 
+    function Invoke-BootstrapGitCommand {
+        [CmdletBinding()]
+        param(
+            [Parameter(Mandatory)]
+            [string[]]$Arguments
+        )
+
+        $previousErrorActionPreference = $ErrorActionPreference
+        try {
+            $ErrorActionPreference = 'Continue'
+            & $gitCommand.Source @Arguments | Out-Host
+            $exitCode = $LASTEXITCODE
+        }
+        finally {
+            $ErrorActionPreference = $previousErrorActionPreference
+        }
+
+        if ($exitCode -ne 0) {
+            throw ("Git command failed with exit code {0}: git {1}" -f $exitCode, ($Arguments -join ' '))
+        }
+    }
+
     $gitMetadataPath = Join-Path -Path $RepositoryPath -ChildPath '.git'
     if (Test-Path -LiteralPath $gitMetadataPath) {
         Write-Host 'Updating ShellForge repository...' -ForegroundColor Cyan
-        & $gitCommand.Source -C $RepositoryPath fetch --all --prune
-        & $gitCommand.Source -C $RepositoryPath checkout $Branch
-        & $gitCommand.Source -C $RepositoryPath pull --ff-only origin $Branch
+        Invoke-BootstrapGitCommand -Arguments @('-C', $RepositoryPath, 'fetch', 'origin', $Branch, '--prune')
+        Invoke-BootstrapGitCommand -Arguments @('-C', $RepositoryPath, 'checkout', $Branch)
+        Invoke-BootstrapGitCommand -Arguments @('-C', $RepositoryPath, 'merge', '--ff-only', ('origin/{0}' -f $Branch))
         return 'Updated'
     }
 
@@ -81,7 +102,7 @@ function Invoke-BootstrapGit {
     }
 
     Write-Host 'Cloning ShellForge repository...' -ForegroundColor Cyan
-    & $gitCommand.Source clone --branch $Branch $RepositoryUrl $RepositoryPath
+    Invoke-BootstrapGitCommand -Arguments @('clone', '--branch', $Branch, $RepositoryUrl, $RepositoryPath)
     return 'Cloned'
 }
 
@@ -94,9 +115,7 @@ $repositoryPath = [System.IO.Path]::GetFullPath((Join-Path -Path $resolvedInstal
 $moduleManifestPath = Join-Path -Path $repositoryPath -ChildPath 'src\ShellForge\ShellForge.psd1'
 
 if (-not $SkipGit.IsPresent) {
-    if ($PSCmdlet.ShouldProcess($repositoryPath, 'Clone or update the ShellForge repository')) {
-        $operationResult = Invoke-BootstrapGit -RepositoryPath $repositoryPath
-    }
+    $operationResult = Invoke-BootstrapGit -RepositoryPath $repositoryPath
 }
 else {
     $operationResult = 'Skipped'
